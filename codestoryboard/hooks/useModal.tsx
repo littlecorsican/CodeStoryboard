@@ -57,7 +57,7 @@ export function useModal(): UseModalReturn {
         />
         
         {/* Modal Content */}
-        <div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <div className="relative bg-white dark:bg-gray-500 rounded-lg shadow-xl max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
           {/* Close Button */}
           <button
             onClick={() => closeModal(onClose)}

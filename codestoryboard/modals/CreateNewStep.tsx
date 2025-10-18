@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { 
   TextField, 
   Button, 
@@ -14,7 +14,6 @@ import {
   Divider
 } from '@mui/material';
 import { Add as AddIcon, Remove as RemoveIcon } from '@mui/icons-material';
-import { useModal } from '../hooks/useModal';
 import { useGlobal } from '../contexts/GlobalContext';
 
 interface Variable {
@@ -22,43 +21,48 @@ interface Variable {
   value: string;
 }
 
-export default function CreateNewStep() {
-  const { openModal, closeModal, ModalWrapper } = useModal();
-  const { steps, setSteps } = useGlobal();
-  const [variableCount, setVariableCount] = useState(1);
+interface CreateNewStepProps {
+  onClose?: () => void;
+}
+
+export default function CreateNewStep({ onClose }: CreateNewStepProps) {
+  const { steps, setSteps, editingStep, setEditingStep } = useGlobal();
   const [savedVariables, setSavedVariables] = useState<Variable[]>([]);
   const nameRefs = useRef<(HTMLInputElement | null)[]>([]);
   const valueRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const resetModal = () => {
-    setVariableCount(1);
     setSavedVariables([]);
-    // Clear all input refs
-    nameRefs.current.forEach(ref => ref && (ref.value = ''));
-    valueRefs.current.forEach(ref => ref && (ref.value = ''));
+    setEditingStep(null);
+    // Clear input refs
+    nameRefs.current[0] && (nameRefs.current[0].value = '');
+    valueRefs.current[0] && (valueRefs.current[0].value = '');
   };
 
-  const addVariableInput = () => {
-    setVariableCount(prev => prev + 1);
-  };
-
-  const saveVariables = () => {
-    const newVariables: Variable[] = [];
-    
-    for (let i = 0; i < variableCount; i++) {
-      const name = nameRefs.current[i]?.value?.trim() || '';
-      const value = valueRefs.current[i]?.value?.trim() || '';
-      
-      if (name || value) {
-        newVariables.push({ name, value });
+  // Load editing data when editingStep changes
+  React.useEffect(() => {
+    if (editingStep) {
+      const stepValue = editingStep.step.value;
+      if (typeof stepValue === 'object' && stepValue !== null) {
+        const variables: Variable[] = Object.entries(stepValue).map(([name, value]) => ({
+          name,
+          value: String(value)
+        }));
+        setSavedVariables(variables);
       }
     }
+  }, [editingStep]);
+
+
+  const saveVariables = () => {
+    const name = nameRefs.current[0]?.value?.trim() || '';
+    const value = valueRefs.current[0]?.value?.trim() || '';
     
-    if (newVariables.length > 0) {
-      setSavedVariables([...savedVariables, ...newVariables]);
+    if (name || value) {
+      setSavedVariables([...savedVariables, { name, value }]);
       // Clear inputs
-      nameRefs.current.forEach(ref => ref && (ref.value = ''));
-      valueRefs.current.forEach(ref => ref && (ref.value = ''));
+      nameRefs.current[0] && (nameRefs.current[0].value = '');
+      valueRefs.current[0] && (valueRefs.current[0].value = '');
     }
   };
 
@@ -75,30 +79,27 @@ export default function CreateNewStep() {
         stepObject[variable.name] = variable.value;
       });
       
-      // Add to global steps array
-      setSteps([...steps, { key: 'Variables', value: stepObject }]);
+      if (editingStep) {
+        // Update existing step
+        const newSteps = [...steps];
+        newSteps[editingStep.index] = { key: 'Variables', value: stepObject };
+        setSteps(newSteps);
+      } else {
+        // Add new step
+        setSteps([...steps, { key: 'Variables', value: stepObject }]);
+      }
       
-      // Reset modal after adding to steps
+      // Reset modal after adding/updating step
       resetModal();
-      closeModal();
+      onClose?.();
     }
   };
 
   return (
     <>
-      <Button 
-        variant="contained" 
-        startIcon={<AddIcon />}
-        onClick={openModal}
-        sx={{ mb: 2 }}
-      >
-        Create New Step
-      </Button>
-
-      <ModalWrapper onClose={resetModal}>
         <Box sx={{ minWidth: 400 }}>
           <Typography variant="h5" component="h2" gutterBottom>
-            Create New Step
+            {editingStep ? 'Edit Step' : 'Create New Step'}
           </Typography>
           
           <Divider sx={{ mb: 3 }} />
@@ -108,45 +109,35 @@ export default function CreateNewStep() {
             Variables
           </Typography>
           
-          {Array.from({ length: variableCount }, (_, index) => (
-            <Box key={index} sx={{ mb: 2 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                <TextField
-                  label="Variable Name"
-                  inputRef={(el) => (nameRefs.current[index] = el)}
-                  variant="outlined"
-                  size="small"
-                  sx={{ 
-                    flex: 1,
-                    '& .MuiInputBase-input': {
-                      color: 'white'
-                    }
-                  }}
-                />
-                <IconButton 
-                  color="primary" 
-                  onClick={addVariableInput}
-                  size="small"
-                >
-                  <AddIcon />
-                </IconButton>
-              </Box>
-              <TextField
-                label="Variable Value"
-                inputRef={(el) => (valueRefs.current[index] = el)}
-                variant="outlined"
-                size="small"
-                fullWidth
-                multiline
-                rows={2}
-                sx={{
-                  '& .MuiInputBase-input': {
-                    color: 'white'
-                  }
-                }}
-              />
-            </Box>
-          ))}
+           <Box sx={{ mb: 2 }}>
+             <TextField
+               label="Variable Name"
+               inputRef={(el) => (nameRefs.current[0] = el)}
+               variant="outlined"
+               size="small"
+               fullWidth
+               sx={{ 
+                 mb: 1,
+                 '& .MuiInputBase-input': {
+                   color: 'white'
+                 }
+               }}
+             />
+             <TextField
+               label="Variable Value"
+               inputRef={(el) => (valueRefs.current[0] = el)}
+               variant="outlined"
+               size="small"
+               fullWidth
+               multiline
+               rows={2}
+               sx={{
+                 '& .MuiInputBase-input': {
+                   color: 'white'
+                 }
+               }}
+             />
+           </Box>
 
           <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
             <Button 
@@ -154,15 +145,6 @@ export default function CreateNewStep() {
               onClick={saveVariables}
             >
               Save
-            </Button>
-            <Button 
-              variant="outlined" 
-              onClick={() => {
-                resetModal();
-                closeModal();
-              }}
-            >
-              Cancel
             </Button>
           </Box>
 
@@ -232,13 +214,12 @@ export default function CreateNewStep() {
                   size="large"
                   sx={{ px: 4 }}
                 >
-                  Add to Steps
+                  {editingStep ? 'Update Step' : 'Add to Steps'}
                 </Button>
               </Box>
             </>
           )}
         </Box>
-      </ModalWrapper>
     </>
   );
 }

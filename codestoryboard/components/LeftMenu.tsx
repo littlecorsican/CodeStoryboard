@@ -56,8 +56,18 @@ const menuItems: MenuItem[] = [
         icon: '📝', 
         href: '/code/snippets',
         onClick: () => {
-          console.log('Adding new step...');
-          // Add step creation logic
+
+
+        }
+      },
+      { 
+        id: 'add_new_step', 
+        label: 'Add New Step', 
+        icon: '📝', 
+        href: '/code/snippets',
+        onClick: () => {
+
+
         }
       },
     ]

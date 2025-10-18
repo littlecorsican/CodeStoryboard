@@ -2,15 +2,34 @@
 
 import { useGlobal } from '../contexts/GlobalContext';
 import CreateNewStep from '../modals/CreateNewStep';
+import { useModal } from '../hooks/useModal';
 import { IconButton } from '@mui/material';
-import { Delete as DeleteIcon } from '@mui/icons-material';
+import { Delete as DeleteIcon, Edit as EditIcon, ContentCopy as DuplicateIcon } from '@mui/icons-material';
 
 export default function Board() {
-  const { steps, setSteps } = useGlobal();
+  const { steps, setSteps, setEditingStep } = useGlobal();
+  const { openModal, closeModal, ModalWrapper: CreateNewStepModalWrapper } = useModal();
+
+  const resetModal = () => {
+    setEditingStep(null);
+  };
 
   const deleteStep = (index: number) => {
     const newSteps = steps.filter((_, i) => i !== index);
     setSteps(newSteps);
+  };
+
+  const duplicateStep = (index: number) => {
+    const stepToDuplicate = steps[index];
+    const newSteps = [...steps];
+    newSteps.splice(index + 1, 0, stepToDuplicate);
+    setSteps(newSteps);
+  };
+
+  const editStep = (index: number) => {
+    const stepToEdit = steps[index];
+    setEditingStep({ index, step: stepToEdit });
+    openModal(); // Open modal when editing
   };
 
   return (
@@ -20,7 +39,12 @@ export default function Board() {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
             Code Storyboard
           </h1>
-          <CreateNewStep />
+          <button 
+            onClick={openModal}
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+          >
+            Create New Step
+          </button>
         </div>
         
         {steps.length === 0 ? (
@@ -63,20 +87,42 @@ export default function Board() {
                   </div>
                 </div>
                 
-                {/* Delete Button */}
-                <IconButton
-                  onClick={() => deleteStep(index)}
-                  className="absolute top-2 right-2 text-gray-400 hover:text-red-500 transition-colors"
-                  size="small"
-                  aria-label="Delete step"
-                >
-                  <DeleteIcon />
-                </IconButton>
+                {/* Action Buttons */}
+                <div className="absolute top-2 right-2 flex gap-1 color-white">
+                  <IconButton
+                    onClick={() => editStep(index)}
+                    className="text-gray-400 hover:text-blue-500 transition-colors"
+                    size="small"
+                    aria-label="Edit step"
+                  >
+                    <EditIcon className="text-white" />
+                  </IconButton>
+                  <IconButton
+                    onClick={() => duplicateStep(index)}
+                    className="text-gray-400 hover:text-green-500 transition-colors"
+                    size="small"
+                    aria-label="Duplicate step"
+                  >
+                    <DuplicateIcon className="text-white" />
+                  </IconButton>
+                  <IconButton
+                    onClick={() => deleteStep(index)}
+                    className="text-gray-400 hover:text-red-500 transition-colors"
+                    size="small"
+                    aria-label="Delete step"
+                  >
+                    <DeleteIcon className="text-white" />
+                  </IconButton>
+                </div>
               </div>
             ))}
           </div>
         )}
       </div>
+      
+      <CreateNewStepModalWrapper onClose={resetModal}>
+        <CreateNewStep onClose={closeModal} />
+      </CreateNewStepModalWrapper>
     </div>
   );
 }

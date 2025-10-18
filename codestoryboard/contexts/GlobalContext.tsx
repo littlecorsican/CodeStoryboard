@@ -11,12 +11,14 @@ interface GlobalState {
   isLoading: boolean;
   steps: Step[];
   db: any;
+  editingStep: { index: number; step: Step } | null;
 }
 
 interface GlobalActions {
   setIsLoading: (loading: boolean) => void;
   setSteps: (steps: Step[]) => void;
   setDb: (db: any) => void;
+  setEditingStep: (editingStep: { index: number; step: Step } | null) => void;
 }
 
 interface GlobalContextType extends GlobalState, GlobalActions {}
@@ -31,11 +33,13 @@ export function GlobalProvider({ children }: GlobalProviderProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [steps, setSteps] = useState<Step[]>([]);
   const [db, setDb] = useState<any>(null);
+  const [editingStep, setEditingStep] = useState<{ index: number; step: Step } | null>(null);
 
   const value: GlobalContextType = {
     isLoading, setIsLoading,
     steps, setSteps,
     db, setDb,
+    editingStep, setEditingStep,
   };
 
   return (
