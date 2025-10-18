@@ -13,9 +13,10 @@ interface MenuItem {
 
 interface LeftMenuProps {
   onOpenCreateNewStep: () => void;
+  onOpenCreateNewDb: () => void;
 }
 
-export default function LeftMenu({ onOpenCreateNewStep }: LeftMenuProps) {
+export default function LeftMenu({ onOpenCreateNewStep, onOpenCreateNewDb }: LeftMenuProps) {
   const [expandedItems, setExpandedItems] = useState<string[]>(['projects', 'code', 'tools']);
   const [activeItem, setActiveItem] = useState<string>('dashboard');
 
@@ -62,11 +63,18 @@ export default function LeftMenu({ onOpenCreateNewStep }: LeftMenuProps) {
           id: 'add_new_step', 
           label: 'Add New Step', 
           icon: '📝', 
-          href: '/code/snippets',
           onClick: () => {
             onOpenCreateNewStep();
           }
         },
+        { 
+            id: 'add_new_db', 
+            label: 'Add New Db', 
+            icon: '🗄️', 
+            onClick: () => {
+              onOpenCreateNewDb();
+            }
+          },
       ]
     },
     {

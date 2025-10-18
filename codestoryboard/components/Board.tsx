@@ -5,9 +5,10 @@ import ActionButtons from './ActionButtons';
 
 interface BoardProps {
   onOpenCreateNewStep: () => void;
+  onOpenCreateNewDb: () => void;
 }
 
-export default function Board({ onOpenCreateNewStep }: BoardProps) {
+export default function Board({ onOpenCreateNewStep, onOpenCreateNewDb }: BoardProps) {
   const { steps, setSteps, setEditingStep } = useGlobal();
 
   const deleteStep = (index: number) => {
@@ -65,12 +66,20 @@ export default function Board({ onOpenCreateNewStep }: BoardProps) {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
             Code Storyboard
           </h1>
-          <button 
-            onClick={onOpenCreateNewStep}
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors cursor-pointer"
-          >
-            Create New Step
-          </button>
+          <div className="flex gap-3">
+            <button 
+              onClick={onOpenCreateNewDb}
+              className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors cursor-pointer"
+            >
+              Create New Db
+            </button>
+            <button 
+              onClick={onOpenCreateNewStep}
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors cursor-pointer"
+            >
+              Create New Step
+            </button>
+          </div>
         </div>
         
         {steps.length === 0 ? (
