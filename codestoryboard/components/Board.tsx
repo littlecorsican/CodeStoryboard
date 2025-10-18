@@ -1,18 +1,15 @@
 'use client';
 
 import { useGlobal } from '../contexts/GlobalContext';
-import CreateNewStep from '../modals/CreateNewStep';
-import { useModal } from '../hooks/useModal';
 import { IconButton } from '@mui/material';
 import { Delete as DeleteIcon, Edit as EditIcon, ContentCopy as DuplicateIcon } from '@mui/icons-material';
 
-export default function Board() {
-  const { steps, setSteps, setEditingStep } = useGlobal();
-  const { openModal, closeModal, ModalWrapper: CreateNewStepModalWrapper } = useModal();
+interface BoardProps {
+  onOpenCreateNewStep: () => void;
+}
 
-  const resetModal = () => {
-    setEditingStep(null);
-  };
+export default function Board({ onOpenCreateNewStep }: BoardProps) {
+  const { steps, setSteps, setEditingStep } = useGlobal();
 
   const deleteStep = (index: number) => {
     const newSteps = steps.filter((_, i) => i !== index);
@@ -29,7 +26,7 @@ export default function Board() {
   const editStep = (index: number) => {
     const stepToEdit = steps[index];
     setEditingStep({ index, step: stepToEdit });
-    openModal(); // Open modal when editing
+    onOpenCreateNewStep(); // Open modal when editing
   };
 
   return (
@@ -40,8 +37,8 @@ export default function Board() {
             Code Storyboard
           </h1>
           <button 
-            onClick={openModal}
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+            onClick={onOpenCreateNewStep}
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors cursor-pointer"
           >
             Create New Step
           </button>
@@ -119,10 +116,6 @@ export default function Board() {
           </div>
         )}
       </div>
-      
-      <CreateNewStepModalWrapper onClose={resetModal}>
-        <CreateNewStep onClose={closeModal} />
-      </CreateNewStepModalWrapper>
     </div>
   );
 }

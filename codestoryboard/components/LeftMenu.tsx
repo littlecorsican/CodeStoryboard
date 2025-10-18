@@ -11,88 +11,81 @@ interface MenuItem {
   onClick?: () => void;
 }
 
-const menuItems: MenuItem[] = [
-  {
-    id: 'dashboard',
-    label: 'Dashboard',
-    icon: '📊',
-    href: '/'
-  },
-  {
-    id: 'projects',
-    label: 'Projects',
-    icon: '📁',
-    children: [
-      { 
-        id: 'open_flow', 
-        label: 'Open Flow', 
-        icon: '📂', 
-        href: '/projects',
-        onClick: () => {
-          console.log('Opening flow...');
-          // Add file picker or flow opening logic
-        }
-      },
-      { 
-        id: 'export_flow', 
-        label: 'Export Flow', 
-        icon: '🕒', 
-        href: '/projects/recent',
-        onClick: () => {
-          console.log('Exporting flow...');
-          // Add export functionality
-        }
-      },
-    ]
-  },
-  {
-    id: 'edit',
-    label: 'Edit',
-    icon: '💻',
-    children: [
-      { 
-        id: 'add_new_step', 
-        label: 'Add New Step', 
-        icon: '📝', 
-        href: '/code/snippets',
-        onClick: () => {
+interface LeftMenuProps {
+  onOpenCreateNewStep: () => void;
+}
 
-
-        }
-      },
-      { 
-        id: 'add_new_step', 
-        label: 'Add New Step', 
-        icon: '📝', 
-        href: '/code/snippets',
-        onClick: () => {
-
-
-        }
-      },
-    ]
-  },
-  {
-    id: 'tools',
-    label: 'Tools',
-    icon: '🔧',
-    children: [
-      { id: 'formatter', label: 'Code Formatter', icon: '✨', href: '/tools/formatter' },
-      { id: 'converter', label: 'Format Converter', icon: '🔄', href: '/tools/converter' },
-      { id: 'validator', label: 'Code Validator', icon: '✅', href: '/tools/validator' }
-    ]
-  },
-  {
-    id: 'settings',
-    label: 'Settings',
-    icon: '⚙️',
-    href: '/settings'
-  }
-];
-
-export default function LeftMenu() {
+export default function LeftMenu({ onOpenCreateNewStep }: LeftMenuProps) {
   const [expandedItems, setExpandedItems] = useState<string[]>(['projects', 'code', 'tools']);
   const [activeItem, setActiveItem] = useState<string>('dashboard');
+
+  const menuItems: MenuItem[] = [
+    {
+      id: 'dashboard',
+      label: 'Dashboard',
+      icon: '📊',
+      href: '/'
+    },
+    {
+      id: 'projects',
+      label: 'Projects',
+      icon: '📁',
+      children: [
+        { 
+          id: 'open_flow', 
+          label: 'Open Flow', 
+          icon: '📂', 
+          href: '/projects',
+          onClick: () => {
+            console.log('Opening flow...');
+            // Add file picker or flow opening logic
+          }
+        },
+        { 
+          id: 'export_flow', 
+          label: 'Export Flow', 
+          icon: '🕒', 
+          href: '/projects/recent',
+          onClick: () => {
+            console.log('Exporting flow...');
+            // Add export functionality
+          }
+        },
+      ]
+    },
+    {
+      id: 'edit',
+      label: 'Edit',
+      icon: '💻',
+      children: [
+        { 
+          id: 'add_new_step', 
+          label: 'Add New Step', 
+          icon: '📝', 
+          href: '/code/snippets',
+          onClick: () => {
+            onOpenCreateNewStep();
+          }
+        },
+      ]
+    },
+    {
+      id: 'tools',
+      label: 'Tools',
+      icon: '🔧',
+      children: [
+        { id: 'formatter', label: 'Code Formatter', icon: '✨', href: '/tools/formatter' },
+        { id: 'converter', label: 'Format Converter', icon: '🔄', href: '/tools/converter' },
+        { id: 'validator', label: 'Code Validator', icon: '✅', href: '/tools/validator' }
+      ]
+    },
+    {
+      id: 'settings',
+      label: 'Settings',
+      icon: '⚙️',
+      href: '/settings'
+    }
+  ];
 
   const toggleExpanded = (itemId: string) => {
     setExpandedItems(prev => 
