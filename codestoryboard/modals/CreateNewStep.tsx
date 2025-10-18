@@ -16,7 +16,7 @@ import {
 import { Add as AddIcon, Remove as RemoveIcon } from '@mui/icons-material';
 import { useGlobal } from '../contexts/GlobalContext';
 
-interface Variable {
+interface State {
   name: string;
   value: string;
 }
@@ -27,16 +27,28 @@ interface CreateNewStepProps {
 
 export default function CreateNewStep({ onClose }: CreateNewStepProps) {
   const { steps, setSteps, editingStep, setEditingStep } = useGlobal();
-  const [savedVariables, setSavedVariables] = useState<Variable[]>([]);
+  const [savedStates, setSavedStates] = useState<State[]>([]);
+  const [description, setDescription] = useState<string>('');
+  const [code, setCode] = useState<string>('');
+  const [location, setLocation] = useState<string>('');
   const nameRefs = useRef<(HTMLInputElement | null)[]>([]);
   const valueRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const descriptionRef = useRef<HTMLInputElement | null>(null);
+  const codeRef = useRef<HTMLInputElement | null>(null);
+  const locationRef = useRef<HTMLInputElement | null>(null);
 
   const resetModal = () => {
-    setSavedVariables([]);
+    setSavedStates([]);
+    setDescription('');
+    setCode('');
+    setLocation('');
     setEditingStep(null);
     // Clear input refs
     nameRefs.current[0] && (nameRefs.current[0].value = '');
     valueRefs.current[0] && (valueRefs.current[0].value = '');
+    descriptionRef.current && (descriptionRef.current.value = '');
+    codeRef.current && (codeRef.current.value = '');
+    locationRef.current && (locationRef.current.value = '');
   };
 
   // Load editing data when editingStep changes
@@ -44,55 +56,85 @@ export default function CreateNewStep({ onClose }: CreateNewStepProps) {
     if (editingStep) {
       const stepValue = editingStep.step.value;
       if (typeof stepValue === 'object' && stepValue !== null) {
-        const variables: Variable[] = Object.entries(stepValue).map(([name, value]) => ({
-          name,
-          value: String(value)
-        }));
-        setSavedVariables(variables);
+        // Handle new format with description, code, location, and state
+        if (stepValue.description || stepValue.code || stepValue.location || stepValue.state) {
+          // New format
+          setDescription(stepValue.description || '');
+          setCode(stepValue.code || '');
+          setLocation(stepValue.location || '');
+          descriptionRef.current && (descriptionRef.current.value = stepValue.description || '');
+          codeRef.current && (codeRef.current.value = stepValue.code || '');
+          locationRef.current && (locationRef.current.value = stepValue.location || '');
+          
+          if (stepValue.state && typeof stepValue.state === 'object') {
+            const states: State[] = Object.entries(stepValue.state).map(([name, value]) => ({
+              name,
+              value: String(value)
+            }));
+            setSavedStates(states);
+          }
+        } else {
+          // Legacy format - convert to new format
+          const states: State[] = Object.entries(stepValue).map(([name, value]) => ({
+            name,
+            value: String(value)
+          }));
+          setSavedStates(states);
+        }
       }
     }
   }, [editingStep]);
 
 
-  const saveVariables = () => {
+  const saveStates = () => {
     const name = nameRefs.current[0]?.value?.trim() || '';
     const value = valueRefs.current[0]?.value?.trim() || '';
     
     if (name || value) {
-      setSavedVariables([...savedVariables, { name, value }]);
+      setSavedStates([...savedStates, { name, value }]);
       // Clear inputs
       nameRefs.current[0] && (nameRefs.current[0].value = '');
       valueRefs.current[0] && (valueRefs.current[0].value = '');
     }
   };
 
-  const deleteVariable = (index: number) => {
-    const newVariables = savedVariables.filter((_, i) => i !== index);
-    setSavedVariables(newVariables);
+  const deleteState = (index: number) => {
+    const newStates = savedStates.filter((_, i) => i !== index);
+    setSavedStates(newStates);
   };
 
   const addToSteps = () => {
-    if (savedVariables.length > 0) {
-      // Create object with variable_name: variable_value format
-      const stepObject: Record<string, any> = {};
-      savedVariables.forEach(variable => {
-        stepObject[variable.name] = variable.value;
-      });
-      
-      if (editingStep) {
-        // Update existing step
-        const newSteps = [...steps];
-        newSteps[editingStep.index] = { key: 'Variables', value: stepObject };
-        setSteps(newSteps);
-      } else {
-        // Add new step
-        setSteps([...steps, { key: 'Variables', value: stepObject }]);
-      }
-      
-      // Reset modal after adding/updating step
-      resetModal();
-      onClose?.();
+    const descriptionValue = description.trim();
+    const codeValue = code.trim();
+    const locationValue = location.trim();
+    
+    // Create state object
+    const stateObject: Record<string, any> = {};
+    savedStates.forEach(state => {
+      stateObject[state.name] = state.value;
+    });
+    
+    // Create step object in new format
+    const stepObject = {
+      description: descriptionValue,
+      code: codeValue,
+      location: locationValue,
+      state: stateObject
+    };
+    
+    if (editingStep) {
+      // Update existing step
+      const newSteps = [...steps];
+      newSteps[editingStep.index] = { key: 'Step', value: stepObject };
+      setSteps(newSteps);
+    } else {
+      // Add new step
+      setSteps([...steps, { key: 'Step', value: stepObject }]);
     }
+    
+    // Reset modal after adding/updating step
+    resetModal();
+    onClose?.();
   };
 
   return (
@@ -104,14 +146,75 @@ export default function CreateNewStep({ onClose }: CreateNewStepProps) {
           
           <Divider sx={{ mb: 3 }} />
 
-          {/* Variable Inputs Section */}
+          {/* Description and Code Section */}
           <Typography variant="h6" gutterBottom>
-            Variables
+            Step Details
+          </Typography>
+          
+          <Box sx={{ mb: 3 }}>
+            <TextField
+              label="Description"
+              inputRef={descriptionRef}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              variant="outlined"
+              size="small"
+              fullWidth
+              multiline
+              rows={2}
+              placeholder="Describe what this step does..."
+              sx={{ 
+                mb: 2,
+                '& .MuiInputBase-input': {
+                  color: 'white'
+                }
+              }}
+            />
+            <TextField
+              label="Code"
+              inputRef={codeRef}
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              variant="outlined"
+              size="small"
+              fullWidth
+              multiline
+              rows={4}
+              placeholder="Enter your code here..."
+              sx={{
+                '& .MuiInputBase-input': {
+                  color: 'white'
+                }
+              }}
+            />
+            <TextField
+              label="Location"
+              inputRef={locationRef}
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              variant="outlined"
+              size="small"
+              fullWidth
+              placeholder="Enter file path (e.g., /path/to/file.js)"
+              sx={{
+                mt: 2,
+                '& .MuiInputBase-input': {
+                  color: 'white'
+                }
+              }}
+            />
+          </Box>
+
+          <Divider sx={{ mb: 3 }} />
+
+          {/* State Inputs Section */}
+          <Typography variant="h6" gutterBottom>
+            State
           </Typography>
           
            <Box sx={{ mb: 2 }}>
              <TextField
-               label="Variable Name"
+               label="State Name"
                inputRef={(el) => (nameRefs.current[0] = el)}
                variant="outlined"
                size="small"
@@ -124,7 +227,7 @@ export default function CreateNewStep({ onClose }: CreateNewStepProps) {
                }}
              />
              <TextField
-               label="Variable Value"
+               label="State Value"
                inputRef={(el) => (valueRefs.current[0] = el)}
                variant="outlined"
                size="small"
@@ -142,18 +245,18 @@ export default function CreateNewStep({ onClose }: CreateNewStepProps) {
           <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
             <Button 
               variant="contained" 
-              onClick={saveVariables}
+              onClick={saveStates}
             >
               Save
             </Button>
           </Box>
 
-          {/* Saved Variables List */}
-          {savedVariables.length > 0 && (
+          {/* Saved States List */}
+          {savedStates.length > 0 && (
             <>
               <Divider sx={{ mb: 2 }} />
               <Typography variant="h6" gutterBottom>
-                Saved Variables
+                Saved States
               </Typography>
               
               <Box sx={{ 
@@ -166,7 +269,7 @@ export default function CreateNewStep({ onClose }: CreateNewStepProps) {
                 borderColor: 'divider',
                 p: 2
               }}>
-                {savedVariables.map((variable, index) => (
+                {savedStates.map((state, index) => (
                   <Box 
                     key={index} 
                     sx={{ 
@@ -182,15 +285,15 @@ export default function CreateNewStep({ onClose }: CreateNewStepProps) {
                   >
                     <Box sx={{ flex:1, display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around', minWidth: 0, color: 'black' }}>
                       <Typography variant="subtitle2" noWrap>
-                        {variable.name}
+                        {state.name}
                       </Typography>
                       <Typography variant="body2" color="text.secondary" noWrap>
-                        {variable.value}
+                        {state.value}
                       </Typography>
                     </Box>
                     <IconButton 
                       color="error"
-                      onClick={() => deleteVariable(index)}
+                      onClick={() => deleteState(index)}
                       size="small"
                       sx={{ ml: 1 }}
                     >
@@ -203,7 +306,7 @@ export default function CreateNewStep({ onClose }: CreateNewStepProps) {
           )}
 
           {/* Add to Steps Button */}
-          {savedVariables.length > 0 && (
+          {(savedStates.length > 0 || description.trim() || code.trim() || location.trim()) && (
             <>
               <Divider sx={{ my: 3 }} />
               <Box sx={{ display: 'flex', justifyContent: 'center' }}>
