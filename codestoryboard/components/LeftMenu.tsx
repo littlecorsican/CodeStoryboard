@@ -74,9 +74,6 @@ export default function LeftMenu({ onOpenCreateNewStep }: LeftMenuProps) {
       label: 'Tools',
       icon: '🔧',
       children: [
-        { id: 'formatter', label: 'Code Formatter', icon: '✨', href: '/tools/formatter' },
-        { id: 'converter', label: 'Format Converter', icon: '🔄', href: '/tools/converter' },
-        { id: 'validator', label: 'Code Validator', icon: '✅', href: '/tools/validator' }
       ]
     },
     {
