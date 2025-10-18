@@ -2,7 +2,7 @@
 
 import { useGlobal } from '../contexts/GlobalContext';
 import { IconButton } from '@mui/material';
-import { Delete as DeleteIcon, Edit as EditIcon, ContentCopy as DuplicateIcon } from '@mui/icons-material';
+import { Delete as DeleteIcon, Edit as EditIcon, ContentCopy as DuplicateIcon, Sync as SyncIcon } from '@mui/icons-material';
 
 interface BoardProps {
   onOpenCreateNewStep: () => void;
@@ -21,6 +21,36 @@ export default function Board({ onOpenCreateNewStep }: BoardProps) {
     const newSteps = [...steps];
     newSteps.splice(index + 1, 0, stepToDuplicate);
     setSteps(newSteps);
+  };
+
+  const syncState = (index: number) => {
+    // Check if there's a previous step
+    if (index === 0) {
+      console.log('No previous step to sync from');
+      return;
+    }
+
+    const currentStep = steps[index];
+    const previousStep = steps[index - 1];
+
+    // Check if both steps have the new format with state
+    if (currentStep.value && typeof currentStep.value === 'object' && 
+        previousStep.value && typeof previousStep.value === 'object') {
+      
+      // Create updated current step with previous step's state
+      const updatedStep = {
+        ...currentStep,
+        value: {
+          ...currentStep.value,
+          state: previousStep.value.state || {}
+        }
+      };
+
+      // Update the steps array
+      const newSteps = [...steps];
+      newSteps[index] = updatedStep;
+      setSteps(newSteps);
+    }
   };
 
   const editStep = (index: number) => {
@@ -157,6 +187,15 @@ export default function Board({ onOpenCreateNewStep }: BoardProps) {
                     aria-label="Duplicate step"
                   >
                     <DuplicateIcon className="text-white" />
+                  </IconButton>
+                  <IconButton
+                    onClick={() => syncState(index)}
+                    className="text-gray-400 hover:text-purple-500 transition-colors"
+                    size="small"
+                    aria-label="Sync state from previous step"
+                    disabled={index === 0}
+                  >
+                    <SyncIcon className="text-white" />
                   </IconButton>
                   <IconButton
                     onClick={() => deleteStep(index)}
