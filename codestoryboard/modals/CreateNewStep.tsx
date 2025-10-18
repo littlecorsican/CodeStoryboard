@@ -28,9 +28,7 @@ interface CreateNewStepProps {
 export default function CreateNewStep({ onClose }: CreateNewStepProps) {
   const { steps, setSteps, editingStep, setEditingStep } = useGlobal();
   const [savedStates, setSavedStates] = useState<State[]>([]);
-  const [description, setDescription] = useState<string>('');
-  const [code, setCode] = useState<string>('');
-  const [location, setLocation] = useState<string>('');
+  const [showAddButton, setShowAddButton] = useState<boolean>(false);
   const nameRefs = useRef<(HTMLInputElement | null)[]>([]);
   const valueRefs = useRef<(HTMLInputElement | null)[]>([]);
   const descriptionRef = useRef<HTMLInputElement | null>(null);
@@ -39,9 +37,7 @@ export default function CreateNewStep({ onClose }: CreateNewStepProps) {
 
   const resetModal = () => {
     setSavedStates([]);
-    setDescription('');
-    setCode('');
-    setLocation('');
+    setShowAddButton(false);
     setEditingStep(null);
     // Clear input refs
     nameRefs.current[0] && (nameRefs.current[0].value = '');
@@ -58,10 +54,7 @@ export default function CreateNewStep({ onClose }: CreateNewStepProps) {
       if (typeof stepValue === 'object' && stepValue !== null) {
         // Handle new format with description, code, location, and state
         if (stepValue.description || stepValue.code || stepValue.location || stepValue.state) {
-          // New format
-          setDescription(stepValue.description || '');
-          setCode(stepValue.code || '');
-          setLocation(stepValue.location || '');
+          // New format - populate refs directly
           descriptionRef.current && (descriptionRef.current.value = stepValue.description || '');
           codeRef.current && (codeRef.current.value = stepValue.code || '');
           locationRef.current && (locationRef.current.value = stepValue.location || '');
@@ -81,6 +74,9 @@ export default function CreateNewStep({ onClose }: CreateNewStepProps) {
           }));
           setSavedStates(states);
         }
+        
+        // Update button visibility after loading data
+        setTimeout(updateButtonVisibility, 0);
       }
     }
   }, [editingStep]);
@@ -95,18 +91,31 @@ export default function CreateNewStep({ onClose }: CreateNewStepProps) {
       // Clear inputs
       nameRefs.current[0] && (nameRefs.current[0].value = '');
       valueRefs.current[0] && (valueRefs.current[0].value = '');
+      // Update button visibility
+      updateButtonVisibility();
     }
+  };
+
+  const updateButtonVisibility = () => {
+    const hasDescription = Boolean(descriptionRef.current?.value?.trim());
+    const hasCode = Boolean(codeRef.current?.value?.trim());
+    const hasLocation = Boolean(locationRef.current?.value?.trim());
+    const hasStates = savedStates.length > 0;
+    
+    setShowAddButton(hasDescription || hasCode || hasLocation || hasStates);
   };
 
   const deleteState = (index: number) => {
     const newStates = savedStates.filter((_, i) => i !== index);
     setSavedStates(newStates);
+    // Update button visibility after deletion
+    setTimeout(updateButtonVisibility, 0);
   };
 
   const addToSteps = () => {
-    const descriptionValue = description.trim();
-    const codeValue = code.trim();
-    const locationValue = location.trim();
+    const descriptionValue = descriptionRef.current?.value?.trim() || '';
+    const codeValue = codeRef.current?.value?.trim() || '';
+    const locationValue = locationRef.current?.value?.trim() || '';
     
     // Create state object
     const stateObject: Record<string, any> = {};
@@ -155,8 +164,7 @@ export default function CreateNewStep({ onClose }: CreateNewStepProps) {
             <TextField
               label="Description"
               inputRef={descriptionRef}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onBlur={updateButtonVisibility}
               variant="outlined"
               size="small"
               fullWidth
@@ -173,8 +181,7 @@ export default function CreateNewStep({ onClose }: CreateNewStepProps) {
             <TextField
               label="Code"
               inputRef={codeRef}
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
+              onBlur={updateButtonVisibility}
               variant="outlined"
               size="small"
               fullWidth
@@ -190,8 +197,7 @@ export default function CreateNewStep({ onClose }: CreateNewStepProps) {
             <TextField
               label="Location"
               inputRef={locationRef}
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
+              onBlur={updateButtonVisibility}
               variant="outlined"
               size="small"
               fullWidth
@@ -306,7 +312,7 @@ export default function CreateNewStep({ onClose }: CreateNewStepProps) {
           )}
 
           {/* Add to Steps Button */}
-          {(savedStates.length > 0 || description.trim() || code.trim() || location.trim()) && (
+          {showAddButton && (
             <>
               <Divider sx={{ my: 3 }} />
               <Box sx={{ display: 'flex', justifyContent: 'center' }}>
