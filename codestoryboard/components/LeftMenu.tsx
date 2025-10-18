@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { useGlobal } from '../contexts/GlobalContext';
+import { exportStepsToJson } from '../utils/exportUtils';
 
 interface MenuItem {
   id: string;
@@ -18,6 +20,7 @@ interface LeftMenuProps {
 export default function LeftMenu({ onOpenCreateNewStep }: LeftMenuProps) {
   const [expandedItems, setExpandedItems] = useState<string[]>(['projects', 'code', 'tools']);
   const [activeItem, setActiveItem] = useState<string>('dashboard');
+  const { steps } = useGlobal();
 
   const menuItems: MenuItem[] = [
     {
@@ -33,22 +36,22 @@ export default function LeftMenu({ onOpenCreateNewStep }: LeftMenuProps) {
       children: [
         { 
           id: 'open_flow', 
-          label: 'Open Flow', 
+          label: 'Export Flow', 
           icon: '📂', 
           href: '/projects',
           onClick: () => {
-            console.log('Opening flow...');
-            // Add file picker or flow opening logic
+            console.log('Exporting flow...');
+            exportStepsToJson(steps);
           }
         },
         { 
-          id: 'export_flow', 
-          label: 'Export Flow', 
-          icon: '🕒', 
-          href: '/projects/recent',
+          id: 'import_flow', 
+          label: 'Import Flow', 
+          icon: '📥', 
+          href: '/projects/import',
           onClick: () => {
-            console.log('Exporting flow...');
-            // Add export functionality
+            console.log('Importing flow...');
+            // Add import functionality
           }
         },
       ]
