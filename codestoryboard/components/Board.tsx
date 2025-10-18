@@ -1,8 +1,7 @@
 'use client';
 
 import { useGlobal } from '../contexts/GlobalContext';
-import { IconButton } from '@mui/material';
-import { Delete as DeleteIcon, Edit as EditIcon, ContentCopy as DuplicateIcon, Sync as SyncIcon } from '@mui/icons-material';
+import ActionButtons from './ActionButtons';
 
 interface BoardProps {
   onOpenCreateNewStep: () => void;
@@ -171,41 +170,13 @@ export default function Board({ onOpenCreateNewStep }: BoardProps) {
                 </div>
                 
                 {/* Action Buttons */}
-                <div className="absolute top-2 right-2 flex gap-1 color-white">
-                  <IconButton
-                    onClick={() => editStep(index)}
-                    className="text-gray-400 hover:text-blue-500 transition-colors"
-                    size="small"
-                    aria-label="Edit step"
-                  >
-                    <EditIcon className="text-white" />
-                  </IconButton>
-                  <IconButton
-                    onClick={() => duplicateStep(index)}
-                    className="text-gray-400 hover:text-green-500 transition-colors"
-                    size="small"
-                    aria-label="Duplicate step"
-                  >
-                    <DuplicateIcon className="text-white" />
-                  </IconButton>
-                  <IconButton
-                    onClick={() => syncState(index)}
-                    className="text-gray-400 hover:text-purple-500 transition-colors"
-                    size="small"
-                    aria-label="Sync state from previous step"
-                    disabled={index === 0}
-                  >
-                    <SyncIcon className="text-white" />
-                  </IconButton>
-                  <IconButton
-                    onClick={() => deleteStep(index)}
-                    className="text-gray-400 hover:text-red-500 transition-colors"
-                    size="small"
-                    aria-label="Delete step"
-                  >
-                    <DeleteIcon className="text-white" />
-                  </IconButton>
-                </div>
+                <ActionButtons
+                  index={index}
+                  onEdit={editStep}
+                  onDuplicate={duplicateStep}
+                  onSyncState={syncState}
+                  onDelete={deleteStep}
+                />
               </div>
             ))}
           </div>
