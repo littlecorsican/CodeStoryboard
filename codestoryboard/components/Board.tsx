@@ -1,8 +1,7 @@
 'use client';
 
 import { useGlobal } from '../contexts/GlobalContext';
-import { IconButton } from '@mui/material';
-import { Delete as DeleteIcon, Edit as EditIcon, ContentCopy as DuplicateIcon } from '@mui/icons-material';
+import ActionButtons from './ActionButtons';
 
 interface BoardProps {
   onOpenCreateNewStep: () => void;
@@ -21,6 +20,36 @@ export default function Board({ onOpenCreateNewStep }: BoardProps) {
     const newSteps = [...steps];
     newSteps.splice(index + 1, 0, stepToDuplicate);
     setSteps(newSteps);
+  };
+
+  const syncState = (index: number) => {
+    // Check if there's a previous step
+    if (index === 0) {
+      console.log('No previous step to sync from');
+      return;
+    }
+
+    const currentStep = steps[index];
+    const previousStep = steps[index - 1];
+
+    // Check if both steps have the new format with state
+    if (currentStep.value && typeof currentStep.value === 'object' && 
+        previousStep.value && typeof previousStep.value === 'object') {
+      
+      // Create updated current step with previous step's state
+      const updatedStep = {
+        ...currentStep,
+        value: {
+          ...currentStep.value,
+          state: previousStep.value.state || {}
+        }
+      };
+
+      // Update the steps array
+      const newSteps = [...steps];
+      newSteps[index] = updatedStep;
+      setSteps(newSteps);
+    }
   };
 
   const editStep = (index: number) => {
@@ -141,32 +170,13 @@ export default function Board({ onOpenCreateNewStep }: BoardProps) {
                 </div>
                 
                 {/* Action Buttons */}
-                <div className="absolute top-2 right-2 flex gap-1 color-white">
-                  <IconButton
-                    onClick={() => editStep(index)}
-                    className="text-gray-400 hover:text-blue-500 transition-colors"
-                    size="small"
-                    aria-label="Edit step"
-                  >
-                    <EditIcon className="text-white" />
-                  </IconButton>
-                  <IconButton
-                    onClick={() => duplicateStep(index)}
-                    className="text-gray-400 hover:text-green-500 transition-colors"
-                    size="small"
-                    aria-label="Duplicate step"
-                  >
-                    <DuplicateIcon className="text-white" />
-                  </IconButton>
-                  <IconButton
-                    onClick={() => deleteStep(index)}
-                    className="text-gray-400 hover:text-red-500 transition-colors"
-                    size="small"
-                    aria-label="Delete step"
-                  >
-                    <DeleteIcon className="text-white" />
-                  </IconButton>
-                </div>
+                <ActionButtons
+                  index={index}
+                  onEdit={editStep}
+                  onDuplicate={duplicateStep}
+                  onSyncState={syncState}
+                  onDelete={deleteStep}
+                />
               </div>
             ))}
           </div>
