@@ -2,8 +2,9 @@
 
 import { useGlobal } from '../contexts/GlobalContext';
 import ActionButtons from './ActionButtons';
+import StateDisplay from './BoardDisplay/StateDisplay';
+import DatabaseDisplay from './BoardDisplay/DatabaseDisplay';
 import { useEffect } from 'react';
-import { TableType } from '../enums/_enums';
 
 interface BoardProps {
   onOpenCreateNewStep: () => void;
@@ -216,55 +217,10 @@ export default function Board({ onOpenCreateNewStep, onOpenEditStep, onOpenCreat
                         )}
                         
                         {/* State */}
-                        {step.state && Object.keys(step.state).length > 0 && (
-                          <div className="bg-green-50 dark:bg-green-900/20 rounded-md p-3">
-                            <h4 className="text-sm font-medium text-green-800 dark:text-green-200 mb-2">State:</h4>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                              {Object.entries(step.state).map(([key, value]) => (
-                                <div key={key} className="flex items-center gap-2">
-                                  <span className="text-sm font-medium text-green-700 dark:text-green-300">{key}:</span>
-                                  <span className="text-sm text-green-600 dark:text-green-400">{String(value)}</span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
+                        <StateDisplay state={step.state || undefined} />
                         
                         {/* Database */}
-                        {step.db && Array.isArray(step.db) && step.db.length > 0 && (
-                          <div className="bg-orange-50 dark:bg-orange-900/20 rounded-md p-3">
-                            <h4 className="text-sm font-medium text-orange-800 dark:text-orange-200 mb-2">Database:</h4>
-                            <div className="space-y-3">
-                              {step.db.map((dbItem: any, dbIndex: number) => (
-                                <div key={dbIndex} className="border border-orange-200 dark:border-orange-700 rounded-md p-2 bg-orange-25 dark:bg-orange-900/10">
-                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
-                                    <div className="flex items-center gap-2">
-                                      <span className="text-sm font-medium text-orange-700 dark:text-orange-300">Type:</span>
-                                      <span className="text-sm text-orange-600 dark:text-orange-400">{dbItem.db === TableType.SQL ? 'SQL' : 'NoSQL'}</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                      <span className="text-sm font-medium text-orange-700 dark:text-orange-300">Table:</span>
-                                      <span className="text-sm text-orange-600 dark:text-orange-400">{dbItem.table_name}</span>
-                                    </div>
-                                  </div>
-                                  {dbItem.data && Object.keys(dbItem.data).length > 0 && (
-                                    <div>
-                                      <h5 className="text-xs font-medium text-orange-700 dark:text-orange-300 mb-1">Data:</h5>
-                                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
-                                        {Object.entries(dbItem.data).map(([key, value]) => (
-                                          <div key={key} className="flex items-center gap-2">
-                                            <span className="text-xs font-medium text-orange-600 dark:text-orange-400">{key}:</span>
-                                            <span className="text-xs text-orange-500 dark:text-orange-500">{String(value)}</span>
-                                          </div>
-                                        ))}
-                                      </div>
-                                    </div>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
+                        <DatabaseDisplay db={step.db || undefined} />
                       </div>
                     ) : (
                       /* Legacy format fallback - show step key */
