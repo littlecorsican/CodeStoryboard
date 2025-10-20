@@ -50,34 +50,23 @@ export default function CreateNewStep({ onClose }: CreateNewStepProps) {
   // Load editing data when editingStep changes
   React.useEffect(() => {
     if (editingStep) {
-      const stepValue = editingStep.step.value;
-      if (typeof stepValue === 'object' && stepValue !== null) {
-        // Handle new format with description, code, location, and state
-        if (stepValue.description || stepValue.code || stepValue.location || stepValue.state) {
-          // New format - populate refs directly
-          descriptionRef.current && (descriptionRef.current.value = stepValue.description || '');
-          codeRef.current && (codeRef.current.value = stepValue.code || '');
-          locationRef.current && (locationRef.current.value = stepValue.location || '');
-          
-          if (stepValue.state && typeof stepValue.state === 'object') {
-            const states: State[] = Object.entries(stepValue.state).map(([name, value]) => ({
-              name,
-              value: String(value)
-            }));
-            setSavedStates(states);
-          }
-        } else {
-          // Legacy format - convert to new format
-          const states: State[] = Object.entries(stepValue).map(([name, value]) => ({
-            name,
-            value: String(value)
-          }));
-          setSavedStates(states);
-        }
-        
-        // Update button visibility after loading data
-        setTimeout(updateButtonVisibility, 0);
+      const step = editingStep.step;
+      
+      // Populate refs directly from flattened structure
+      descriptionRef.current && (descriptionRef.current.value = step.description || '');
+      codeRef.current && (codeRef.current.value = step.code || '');
+      locationRef.current && (locationRef.current.value = step.location || '');
+      
+      if (step.state && typeof step.state === 'object') {
+        const states: State[] = Object.entries(step.state).map(([name, value]) => ({
+          name,
+          value: String(value)
+        }));
+        setSavedStates(states);
       }
+      
+      // Update button visibility after loading data
+      setTimeout(updateButtonVisibility, 0);
     }
   }, [editingStep]);
 
@@ -138,12 +127,12 @@ export default function CreateNewStep({ onClose }: CreateNewStepProps) {
     if (editingStep) {
       // Update existing step
       const newSteps = [...steps];
-      newSteps[editingStep.index] = { key: editingStep.step.key, value: stepObject };
+      newSteps[editingStep.index] = { key: editingStep.step.key, ...stepObject };
       setSteps(newSteps);
     } else {
       // Add new step
       const uuid = crypto.randomUUID();
-      setSteps([...steps, { key: uuid, value: stepObject }]);
+      setSteps([...steps, { key: uuid, ...stepObject }]);
     }
     
     // Reset modal after adding/updating step

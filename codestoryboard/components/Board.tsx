@@ -2,13 +2,20 @@
 
 import { useGlobal } from '../contexts/GlobalContext';
 import ActionButtons from './ActionButtons';
+import { useEffect } from 'react';
+import { TableType } from '../enums/_enums';
 
 interface BoardProps {
   onOpenCreateNewStep: () => void;
+  onOpenCreateNewDb: (index: number) => void;
 }
 
-export default function Board({ onOpenCreateNewStep }: BoardProps) {
+export default function Board({ onOpenCreateNewStep, onOpenCreateNewDb }: BoardProps) {
   const { steps, setSteps, setEditingStep } = useGlobal();
+
+  useEffect(() => {
+    console.log(steps);
+  }, [steps]);
 
   const deleteStep = (index: number) => {
     const newSteps = steps.filter((_, i) => i !== index);
@@ -32,17 +39,13 @@ export default function Board({ onOpenCreateNewStep }: BoardProps) {
     const currentStep = steps[index];
     const previousStep = steps[index - 1];
 
-    // Check if both steps have the new format with state
-    if (currentStep.value && typeof currentStep.value === 'object' && 
-        previousStep.value && typeof previousStep.value === 'object') {
+    // Check if both steps have state properties
+    if (currentStep.state && previousStep.state) {
       
       // Create updated current step with previous step's state
       const updatedStep = {
         ...currentStep,
-        value: {
-          ...currentStep.value,
-          state: previousStep.value.state || {}
-        }
+        state: previousStep.state || {}
       };
 
       // Update the steps array
@@ -56,6 +59,12 @@ export default function Board({ onOpenCreateNewStep }: BoardProps) {
     const stepToEdit = steps[index];
     setEditingStep({ index, step: stepToEdit });
     onOpenCreateNewStep(); // Open modal when editing
+  };
+
+  const openCreateNewDb = (index: number) => {
+    const stepToEdit = steps[index];
+    setEditingStep({ index, step: stepToEdit });
+    onOpenCreateNewDb(index); // Open database modal
   };
 
   return (
@@ -103,49 +112,49 @@ export default function Board({ onOpenCreateNewStep }: BoardProps) {
                     </h3>
                     
                     {/* Display new format with description, code, location, and state */}
-                    {step.value && typeof step.value === 'object' && (step.value.description || step.value.code || step.value.location || step.value.state) ? (
+                    {(step.description || step.code || step.location || step.state) ? (
                       <div className="space-y-3">
                         {/* Description */}
-                        {step.value.description && (
+                        {step.description && (
                           <div className="bg-blue-50 dark:bg-blue-900/20 rounded-md p-3">
                             <h4 className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-1">Description:</h4>
-                            <p className="text-sm text-blue-700 dark:text-blue-300">{step.value.description}</p>
+                            <p className="text-sm text-blue-700 dark:text-blue-300">{step.description}</p>
                           </div>
                         )}
                         
                         {/* Code */}
-                        {step.value.code && (
+                        {step.code && (
                           <div className="bg-gray-50 dark:bg-gray-700 rounded-md p-3">
                             <h4 className="text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">Code:</h4>
                             <pre className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap break-words font-mono">
-                              {step.value.code}
+                              {step.code}
                             </pre>
                           </div>
                         )}
                         
                         {/* Location */}
-                        {step.value.location && (
+                        {step.location && (
                           <div className="bg-purple-50 dark:bg-purple-900/20 rounded-md p-3">
                             <h4 className="text-sm font-medium text-purple-800 dark:text-purple-200 mb-2">Location:</h4>
                             <button
                               onClick={() => {
-                                if (step.value.location) {
-                                  window.open(`vscode://file/${step.value.location}`, '_blank');
+                                if (step.location) {
+                                  window.open(`vscode://file/${step.location}`, '_blank');
                                 }
                               }}
                               className="text-sm text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-200 underline cursor-pointer break-all text-left"
                             >
-                              {step.value.location}
+                              {step.location}
                             </button>
                           </div>
                         )}
                         
                         {/* State */}
-                        {step.value.state && Object.keys(step.value.state).length > 0 && (
+                        {step.state && Object.keys(step.state).length > 0 && (
                           <div className="bg-green-50 dark:bg-green-900/20 rounded-md p-3">
                             <h4 className="text-sm font-medium text-green-800 dark:text-green-200 mb-2">State:</h4>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                              {Object.entries(step.value.state).map(([key, value]) => (
+                              {Object.entries(step.state).map(([key, value]) => (
                                 <div key={key} className="flex items-center gap-2">
                                   <span className="text-sm font-medium text-green-700 dark:text-green-300">{key}:</span>
                                   <span className="text-sm text-green-600 dark:text-green-400">{String(value)}</span>
@@ -154,15 +163,48 @@ export default function Board({ onOpenCreateNewStep }: BoardProps) {
                             </div>
                           </div>
                         )}
+                        
+                        {/* Database */}
+                        {step.db && Array.isArray(step.db) && step.db.length > 0 && (
+                          <div className="bg-orange-50 dark:bg-orange-900/20 rounded-md p-3">
+                            <h4 className="text-sm font-medium text-orange-800 dark:text-orange-200 mb-2">Database:</h4>
+                            <div className="space-y-3">
+                              {step.db.map((dbItem: any, dbIndex: number) => (
+                                <div key={dbIndex} className="border border-orange-200 dark:border-orange-700 rounded-md p-2 bg-orange-25 dark:bg-orange-900/10">
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-sm font-medium text-orange-700 dark:text-orange-300">Type:</span>
+                                      <span className="text-sm text-orange-600 dark:text-orange-400">{dbItem.db === TableType.SQL ? 'SQL' : 'NoSQL'}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-sm font-medium text-orange-700 dark:text-orange-300">Table:</span>
+                                      <span className="text-sm text-orange-600 dark:text-orange-400">{dbItem.table_name}</span>
+                                    </div>
+                                  </div>
+                                  {dbItem.data && Object.keys(dbItem.data).length > 0 && (
+                                    <div>
+                                      <h5 className="text-xs font-medium text-orange-700 dark:text-orange-300 mb-1">Data:</h5>
+                                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
+                                        {Object.entries(dbItem.data).map(([key, value]) => (
+                                          <div key={key} className="flex items-center gap-2">
+                                            <span className="text-xs font-medium text-orange-600 dark:text-orange-400">{key}:</span>
+                                            <span className="text-xs text-orange-500 dark:text-orange-500">{String(value)}</span>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ) : (
-                      /* Legacy format fallback */
+                      /* Legacy format fallback - show step key */
                       <div className="bg-gray-50 dark:bg-gray-700 rounded-md p-3">
                         <pre className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap break-words">
-                          {typeof step.value === 'string' 
-                            ? step.value 
-                            : JSON.stringify(step.value, null, 2)
-                          }
+                          {step.key}
                         </pre>
                       </div>
                     )}
@@ -176,6 +218,7 @@ export default function Board({ onOpenCreateNewStep }: BoardProps) {
                   onDuplicate={duplicateStep}
                   onSyncState={syncState}
                   onDelete={deleteStep}
+                  onOpenCreateNewDb={openCreateNewDb}
                 />
               </div>
             ))}
