@@ -1,19 +1,21 @@
 interface Step {
   key: string;
-  value: {
-    description?: string;
-    code?: string;
-    location?: string;
-    state?: Record<string, any>;
-  };
+  description?: string;
+  code?: string;
+  location?: string;
+  state?: Record<string, any>;
+  db?: any[];
+  [key: string]: any;
 }
 
 interface ExportData {
   steps: Array<{
+    key?: string;
     code?: string;
     location?: string;
     description?: string;
     state?: Record<string, any>;
+    db?: any[];
   }>;
 }
 
@@ -21,10 +23,12 @@ export const exportStepsToJson = (steps: Step[]): void => {
   // Transform steps to the required format
   const exportData: ExportData = {
     steps: steps.map(step => ({
-      code: step.value.code || '',
-      location: step.value.location || '',
-      description: step.value.description || '',
-      state: step.value.state || {}
+      key: step.key,
+      code: step.code || '',
+      location: step.location || '',
+      description: step.description || '',
+      state: step.state || {},
+      db: step.db || []
     }))
   };
 

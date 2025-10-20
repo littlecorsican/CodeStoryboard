@@ -1,19 +1,21 @@
 interface Step {
   key: string;
-  value: {
-    description?: string;
-    code?: string;
-    location?: string;
-    state?: Record<string, any>;
-  };
+  description?: string;
+  code?: string;
+  location?: string;
+  state?: Record<string, any>;
+  db?: any[];
+  [key: string]: any;
 }
 
 interface ImportData {
   steps: Array<{
+    key?: string;
     code?: string;
     location?: string;
     description?: string;
     state?: Record<string, any>;
+    db?: any[];
   }>;
 }
 
@@ -47,13 +49,12 @@ export const importStepsFromJson = (): Promise<Step[]> => {
 
           // Transform imported data to internal format
           const transformedSteps: Step[] = importData.steps.map((stepData, index) => ({
-            key: 'Step',
-            value: {
-              description: stepData.description || '',
-              code: stepData.code || '',
-              location: stepData.location || '',
-              state: stepData.state || {}
-            }
+            key: stepData.key || `Step-${index + 1}`,
+            description: stepData.description || '',
+            code: stepData.code || '',
+            location: stepData.location || '',
+            state: stepData.state || {},
+            db: stepData.db || []
           }));
 
           resolve(transformedSteps);

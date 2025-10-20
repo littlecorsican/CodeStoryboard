@@ -2,7 +2,10 @@
 
 import { PageType } from '@/enums/_enums';
 import { useState } from 'react';
-import { useGlobal } from '@/contexts/GlobalContext';
+import { useGlobal } from '../contexts/GlobalContext';
+import { importStepsFromJson } from '../utils/importUtils';
+import { exportStepsToJson } from '../utils/exportUtils';
+
 
 interface MenuItem {
   id: string;
@@ -21,6 +24,19 @@ interface LeftMenuProps {
 export default function LeftMenu({ onOpenCreateNewStep, onOpenCreateNewDbTemplate }: LeftMenuProps) {
   const [expandedItems, setExpandedItems] = useState<string[]>(['projects', 'code', 'tools']);
   const [activeItem, setActiveItem] = useState<string>('dashboard');
+  const { steps, setSteps } = useGlobal();
+
+  const handleImportFlow = async () => {
+    try {
+      const importedSteps = await importStepsFromJson();
+      setSteps(importedSteps);
+      console.log('Successfully imported steps:', importedSteps.length);
+    } catch (error) {
+      console.error('Failed to import steps:', error);
+      alert(`Import failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  };
+
   const { setPage } = useGlobal();
   
   const menuItems: MenuItem[] = [
