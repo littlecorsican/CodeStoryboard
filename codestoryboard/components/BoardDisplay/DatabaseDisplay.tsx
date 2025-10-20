@@ -40,7 +40,7 @@ export default function DatabaseDisplay({ db }: DatabaseDisplayProps) {
                       {typeof data === 'string' ? (
                         <span className="text-xs text-orange-500 dark:text-orange-500">{data}</span>
                       ) : (
-                        <div className="flex flex-col">
+                        <div className="flex flex-row gap-2">
                           <span className="text-xs text-orange-500 dark:text-orange-500">Value: {(data as { value: string; type: string }).value}</span>
                           <span className="text-xs text-orange-400 dark:text-orange-400">Type: {(data as { value: string; type: string }).type}</span>
                         </div>

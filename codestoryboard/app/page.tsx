@@ -30,6 +30,11 @@ export default function Home() {
     openCreateNewStepModal();
   };
 
+  const handleOpenEditDb = () => {
+    // Don't clear editingStep - it should already be set by the editDb function
+    openCreateNewDbModal();
+  };
+
   const resetModal = () => {
     // Reset any modal-specific state here if needed
   };
@@ -46,6 +51,7 @@ export default function Home() {
             onOpenCreateNewStep={handleOpenCreateNewStep}
             onOpenEditStep={handleOpenEditStep}
             onOpenCreateNewDb={(index: number) => openCreateNewDbModal()}
+            onOpenEditDb={handleOpenEditDb}
           />
         ) : page === PageType.DBTEMPLATE ? (
           <DbTemplateList />

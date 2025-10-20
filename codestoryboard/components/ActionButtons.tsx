@@ -1,7 +1,7 @@
 'use client';
 
 import { IconButton, Tooltip } from '@mui/material';
-import { Delete as DeleteIcon, Edit as EditIcon, ContentCopy as DuplicateIcon, Sync as SyncIcon, Storage as DbIcon, CloudDownload as DbSyncIcon, ClearAll as ClearStatesIcon, DeleteSweep as ClearDbIcon } from '@mui/icons-material';
+import { Delete as DeleteIcon, Edit as EditIcon, ContentCopy as DuplicateIcon, Sync as SyncIcon, Storage as DbIcon, CloudDownload as DbSyncIcon, ClearAll as ClearStatesIcon, DeleteSweep as ClearDbIcon, EditNote as EditDbIcon } from '@mui/icons-material';
 
 interface ActionButtonsProps {
   index: number;
@@ -13,6 +13,7 @@ interface ActionButtonsProps {
   onClearDb: (index: number) => void;
   onDelete: (index: number) => void;
   onOpenCreateNewDb: (index: number) => void;
+  onEditDb: (index: number) => void;
 }
 
 export default function ActionButtons({ 
@@ -24,7 +25,8 @@ export default function ActionButtons({
   onClearStates,
   onClearDb,
   onDelete,
-  onOpenCreateNewDb
+  onOpenCreateNewDb,
+  onEditDb
 }: ActionButtonsProps) {
   return (
     <div className="absolute top-2 right-2 flex gap-1 color-white">
@@ -119,6 +121,17 @@ export default function ActionButtons({
           aria-label="Create new db snapshot"
         >
           <DbIcon className="text-white" />
+        </IconButton>
+      </Tooltip>
+      
+      <Tooltip title="Edit database" arrow>
+        <IconButton
+          onClick={() => onEditDb(index)}
+          className="text-gray-400 hover:text-indigo-500 transition-colors"
+          size="small"
+          aria-label="Edit database"
+        >
+          <EditDbIcon className="text-white" />
         </IconButton>
       </Tooltip>
     </div>

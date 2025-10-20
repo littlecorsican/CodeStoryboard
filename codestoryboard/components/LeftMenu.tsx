@@ -2,7 +2,10 @@
 
 import { PageType } from '@/enums/_enums';
 import { useState } from 'react';
-import { useGlobal } from '@/contexts/GlobalContext';
+import { useGlobal } from '../contexts/GlobalContext';
+import { importStepsFromJson } from '../utils/importUtils';
+import { exportStepsToJson } from '../utils/exportUtils';
+
 
 interface MenuItem {
   id: string;
@@ -21,6 +24,19 @@ interface LeftMenuProps {
 export default function LeftMenu({ onOpenCreateNewStep, onOpenCreateNewDbTemplate }: LeftMenuProps) {
   const [expandedItems, setExpandedItems] = useState<string[]>(['projects', 'code', 'tools']);
   const [activeItem, setActiveItem] = useState<string>('dashboard');
+  const { steps, setSteps } = useGlobal();
+
+  const handleImportFlow = async () => {
+    try {
+      const importedSteps = await importStepsFromJson();
+      setSteps(importedSteps);
+      console.log('Successfully imported steps:', importedSteps.length);
+    } catch (error) {
+      console.error('Failed to import steps:', error);
+      alert(`Import failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  };
+
   const { setPage } = useGlobal();
   
   const menuItems: MenuItem[] = [
@@ -53,24 +69,21 @@ export default function LeftMenu({ onOpenCreateNewStep, onOpenCreateNewDbTemplat
       icon: '📁',
       children: [
         { 
-          id: 'open_flow', 
-          label: 'Open Flow', 
+          id: 'export_flow', 
+          label: 'Export Flow', 
           icon: '📂', 
           href: '/projects',
           onClick: () => {
-            console.log('Opening flow...');
-            // Add file picker or flow opening logic
+            console.log('Exporting flow...');
+            exportStepsToJson(steps);
           }
         },
         { 
-          id: 'export_flow', 
-          label: 'Export Flow', 
-          icon: '🕒', 
-          href: '/projects/recent',
-          onClick: () => {
-            console.log('Exporting flow...');
-            // Add export functionality
-          }
+          id: 'import_flow', 
+          label: 'Import Flow', 
+          icon: '📥', 
+          href: '/projects/import',
+          onClick: handleImportFlow
         },
       ]
     },

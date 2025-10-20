@@ -10,9 +10,10 @@ interface BoardProps {
   onOpenCreateNewStep: () => void;
   onOpenEditStep: () => void;
   onOpenCreateNewDb: (index: number) => void;
+  onOpenEditDb: () => void;
 }
 
-export default function Board({ onOpenCreateNewStep, onOpenEditStep, onOpenCreateNewDb }: BoardProps) {
+export default function Board({ onOpenCreateNewStep, onOpenEditStep, onOpenCreateNewDb, onOpenEditDb }: BoardProps) {
   const { steps, setSteps, setEditingStep } = useGlobal();
 
   useEffect(() => {
@@ -127,6 +128,11 @@ export default function Board({ onOpenCreateNewStep, onOpenEditStep, onOpenCreat
     onOpenEditStep(); // Open modal when editing
   };
 
+  const editDb = (index: number) => {
+    const stepToEdit = steps[index];
+    setEditingStep({ index, step: stepToEdit });
+    onOpenEditDb(); // Open database edit modal
+  };
 
   const openCreateNewDb = (index: number) => {
     const stepToEdit = steps[index];
@@ -244,6 +250,7 @@ export default function Board({ onOpenCreateNewStep, onOpenEditStep, onOpenCreat
                   onClearDb={clearDb}
                   onDelete={deleteStep}
                   onOpenCreateNewDb={openCreateNewDb}
+                  onEditDb={editDb}
                 />
               </div>
             ))}
