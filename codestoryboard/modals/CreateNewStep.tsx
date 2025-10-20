@@ -138,11 +138,12 @@ export default function CreateNewStep({ onClose }: CreateNewStepProps) {
     if (editingStep) {
       // Update existing step
       const newSteps = [...steps];
-      newSteps[editingStep.index] = { key: 'Step', value: stepObject };
+      newSteps[editingStep.index] = { key: editingStep.step.key, value: stepObject };
       setSteps(newSteps);
     } else {
       // Add new step
-      setSteps([...steps, { key: 'Step', value: stepObject }]);
+      const uuid = crypto.randomUUID();
+      setSteps([...steps, { key: uuid, value: stepObject }]);
     }
     
     // Reset modal after adding/updating step
