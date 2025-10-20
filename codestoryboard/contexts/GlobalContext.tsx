@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, ReactNode, useState } from 'react';
+import { TableType } from '../enums/_enums';
 
 interface Step {
   key: string;
@@ -12,10 +13,18 @@ interface Step {
   [key: string]: any; // Allow additional properties
 }
 
+interface DbTemplate {
+  dbType: TableType;
+  table_name: string;
+  data: Record<string, string>;
+}
+
 interface GlobalState {
   isLoading: boolean;
   steps: Step[];
   editingStep: { index: number; step: Step } | null;
+  dbTemplate: DbTemplate[];
+  setDbTemplate: (dbTemplate: any[]) => void;
 }
 
 interface GlobalActions {
@@ -36,11 +45,13 @@ export function GlobalProvider({ children }: GlobalProviderProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [steps, setSteps] = useState<Step[]>([]);
   const [editingStep, setEditingStep] = useState<{ index: number; step: Step } | null>(null);
+  const [dbTemplate, setDbTemplate] = useState<DbTemplate[]>([]);
 
   const value: GlobalContextType = {
     isLoading, setIsLoading,
     steps, setSteps,
     editingStep, setEditingStep,
+    dbTemplate, setDbTemplate,
   };
 
   return (

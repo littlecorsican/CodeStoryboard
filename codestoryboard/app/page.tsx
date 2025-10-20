@@ -3,13 +3,20 @@ import Board from "../components/Board";
 import LeftMenu from "../components/LeftMenu";
 import CreateNewStep from "../modals/CreateNewStep";
 import CreateNewDb from "../modals/CreateNewDb";
+import CreateNewDbTemplate from "../modals/CreateNewDbTemplate";
 import { useModal } from "../hooks/useModal";
 import { useGlobal } from "../contexts/GlobalContext";
+import { useEffect } from "react";
 
 export default function Home() {
   const { openModal: openCreateNewStepModal, closeModal: closeCreateNewStepModal, ModalWrapper: CreateNewStepModalWrapper } = useModal();
   const { openModal: openCreateNewDbModal, closeModal: closeCreateNewDbModal, ModalWrapper: CreateNewDbModalWrapper } = useModal();
-  const { setEditingStep } = useGlobal();
+  const { openModal: openCreateNewDbTemplateModal, closeModal: closeCreateNewDbTemplateModal, ModalWrapper: CreateNewDbTemplateModalWrapper } = useModal();
+  const { setEditingStep, dbTemplate } = useGlobal();
+
+  useEffect(() => {
+    console.log("dbTemplate", dbTemplate);
+  }, [dbTemplate]);
 
   const handleOpenCreateNewStep = () => {
     setEditingStep(null); // Clear editing step to ensure create mode
@@ -29,6 +36,7 @@ export default function Home() {
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
       <LeftMenu 
         onOpenCreateNewStep={handleOpenCreateNewStep} 
+        onOpenCreateNewDbTemplate={() => openCreateNewDbTemplateModal()}
       />
       <main className="flex-1 overflow-auto">
         <Board 
@@ -45,6 +53,10 @@ export default function Home() {
       <CreateNewDbModalWrapper onClose={resetModal}>
         <CreateNewDb onClose={closeCreateNewDbModal} />
       </CreateNewDbModalWrapper>
+
+      <CreateNewDbTemplateModalWrapper onClose={resetModal}>
+        <CreateNewDbTemplate onClose={closeCreateNewDbTemplateModal} />
+      </CreateNewDbTemplateModalWrapper>
     </div>
   );
 }
