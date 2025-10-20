@@ -7,10 +7,11 @@ import { TableType } from '../enums/_enums';
 
 interface BoardProps {
   onOpenCreateNewStep: () => void;
+  onOpenEditStep: () => void;
   onOpenCreateNewDb: (index: number) => void;
 }
 
-export default function Board({ onOpenCreateNewStep, onOpenCreateNewDb }: BoardProps) {
+export default function Board({ onOpenCreateNewStep, onOpenEditStep, onOpenCreateNewDb }: BoardProps) {
   const { steps, setSteps, setEditingStep } = useGlobal();
 
   useEffect(() => {
@@ -55,11 +56,76 @@ export default function Board({ onOpenCreateNewStep, onOpenCreateNewDb }: BoardP
     }
   };
 
+  const syncDb = (index: number) => {
+    // Check if there's a previous step
+    if (index === 0) {
+      console.log('No previous step to sync database from');
+      return;
+    }
+
+    const currentStep = steps[index];
+    const previousStep = steps[index - 1];
+
+    // Check if previous step has database data
+    if (previousStep.db && Array.isArray(previousStep.db) && previousStep.db.length > 0) {
+      
+      // Create updated current step with previous step's database
+      const updatedStep = {
+        ...currentStep,
+        db: [...previousStep.db] // Copy the entire database array
+      };
+
+      // Update the steps array
+      const newSteps = [...steps];
+      newSteps[index] = updatedStep;
+      setSteps(newSteps);
+      
+      console.log('Database synced from previous step');
+    } else {
+      console.log('Previous step has no database to sync');
+    }
+  };
+
+  const clearStates = (index: number) => {
+    const currentStep = steps[index];
+    
+    // Create updated current step without state
+    const updatedStep = {
+      ...currentStep,
+      state: undefined // Remove the state property
+    };
+
+    // Update the steps array
+    const newSteps = [...steps];
+    newSteps[index] = updatedStep;
+    setSteps(newSteps);
+    
+    console.log('All states cleared from step');
+  };
+
+  const clearDb = (index: number) => {
+    const currentStep = steps[index];
+    
+    // Create updated current step without database
+    const updatedStep = {
+      ...currentStep,
+      db: undefined // Remove the db property
+    };
+
+    // Update the steps array
+    const newSteps = [...steps];
+    newSteps[index] = updatedStep;
+    setSteps(newSteps);
+    
+    console.log('All database entries cleared from step');
+  };
+
   const editStep = (index: number) => {
     const stepToEdit = steps[index];
     setEditingStep({ index, step: stepToEdit });
-    onOpenCreateNewStep(); // Open modal when editing
+    onOpenEditStep(); // Open modal when editing
   };
+
 
   const openCreateNewDb = (index: number) => {
     const stepToEdit = steps[index];
@@ -217,6 +283,9 @@ export default function Board({ onOpenCreateNewStep, onOpenCreateNewDb }: BoardP
                   onEdit={editStep}
                   onDuplicate={duplicateStep}
                   onSyncState={syncState}
+                  onSyncDb={syncDb}
+                  onClearStates={clearStates}
+                  onClearDb={clearDb}
                   onDelete={deleteStep}
                   onOpenCreateNewDb={openCreateNewDb}
                 />

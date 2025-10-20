@@ -30,17 +30,47 @@ export default function CreateNewDb({ onClose }: CreateNewDbProps) {
   const [tableName, setTableName] = useState<string>('');
   const [savedColumns, setSavedColumns] = useState<ColumnData[]>([]);
   const [showAddButton, setShowAddButton] = useState<boolean>(false);
+  const [isEditMode, setIsEditMode] = useState<boolean>(false);
+  const [editingDbIndex, setEditingDbIndex] = useState<number>(-1);
   
   const columnNameRef = useRef<HTMLInputElement | null>(null);
   const columnValueRef = useRef<HTMLInputElement | null>(null);
   
   const { steps, setSteps, editingStep, setEditingStep } = useGlobal();
 
+  // Check if we should enter edit mode when editingStep changes
+  React.useEffect(() => {
+    if (editingStep && editingStep.step.db && Array.isArray(editingStep.step.db) && editingStep.step.db.length > 0) {
+      // Enter edit mode - load the first database entry
+      const firstDb = editingStep.step.db[0];
+      setDbType(firstDb.db);
+      setTableName(firstDb.table_name || '');
+      
+      // Convert data object to column format
+      const columns: ColumnData[] = Object.entries(firstDb.data || {}).map(([name, value]) => ({
+        column_name: name,
+        column_value: String(value)
+      }));
+      setSavedColumns(columns);
+      
+      setIsEditMode(true);
+      setEditingDbIndex(0);
+      setShowAddButton(true);
+    } else {
+      // Enter create mode
+      resetModal();
+      setIsEditMode(false);
+      setEditingDbIndex(-1);
+    }
+  }, [editingStep]);
+
   const resetModal = () => {
     setDbType(TableType.SQL);
     setTableName('');
     setSavedColumns([]);
     setShowAddButton(false);
+    setIsEditMode(false);
+    setEditingDbIndex(-1);
     // Clear input refs
     if (columnNameRef.current) columnNameRef.current.value = '';
     if (columnValueRef.current) columnValueRef.current.value = '';
@@ -90,15 +120,29 @@ export default function CreateNewDb({ onClose }: CreateNewDbProps) {
     console.log("dbObject", dbObject)
     console.log("editingStep", editingStep)
     
-    // Update global state - add db to current editing step
+    // Update global state - add or update db in current editing step
     if (editingStep) {
       console.log("editingStep is not null", editingStep.step)
       const currentStep = editingStep.step;
-      const updatedStep = {
-        ...currentStep,
-        db: currentStep.db ? [...currentStep.db, dbObject] : [dbObject]
-      };
-      console.log("updatedStep", updatedStep)
+      let updatedStep;
+      
+      if (isEditMode && editingDbIndex >= 0) {
+        // Edit mode - update existing database entry
+        const updatedDb = [...(currentStep.db || [])];
+        updatedDb[editingDbIndex] = dbObject;
+        updatedStep = {
+          ...currentStep,
+          db: updatedDb
+        };
+        console.log("Updated existing database entry", updatedStep);
+      } else {
+        // Create mode - add new database entry
+        updatedStep = {
+          ...currentStep,
+          db: currentStep.db ? [...currentStep.db, dbObject] : [dbObject]
+        };
+        console.log("Added new database entry", updatedStep);
+      }
       
       // Update the steps array
       const newSteps = [...steps];
@@ -122,7 +166,7 @@ export default function CreateNewDb({ onClose }: CreateNewDbProps) {
     <>
       <Box sx={{ minWidth: 400 }}>
         <Typography variant="h5" component="h2" gutterBottom>
-          Create New Database
+          {isEditMode ? 'Edit Database' : 'Create New Database'}
         </Typography>
         
         <Divider sx={{ mb: 3 }} />
@@ -300,7 +344,7 @@ export default function CreateNewDb({ onClose }: CreateNewDbProps) {
                 size="large"
                 sx={{ px: 4 }}
               >
-                Add to Database
+                {isEditMode ? 'Update Database' : 'Add to Database'}
               </Button>
             </Box>
           </>

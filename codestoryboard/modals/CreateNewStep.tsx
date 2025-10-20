@@ -125,9 +125,15 @@ export default function CreateNewStep({ onClose }: CreateNewStepProps) {
     };
     
     if (editingStep) {
-      // Update existing step
+      // Update existing step - preserve existing db data
       const newSteps = [...steps];
-      newSteps[editingStep.index] = { key: editingStep.step.key, ...stepObject };
+      const existingStep = editingStep.step;
+      newSteps[editingStep.index] = { 
+        key: existingStep.key, 
+        ...stepObject,
+        // Preserve existing database data if it exists
+        ...(existingStep.db && { db: existingStep.db })
+      };
       setSteps(newSteps);
     } else {
       // Add new step
