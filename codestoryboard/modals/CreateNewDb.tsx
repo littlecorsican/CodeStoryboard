@@ -142,7 +142,7 @@ export default function CreateNewDb({ onClose }: CreateNewDbProps) {
     
     // Create database object
     const dbObject = {
-      db: dbType,
+      dbType: dbType,
       table_name: tableName,
       data: dataObject
     };

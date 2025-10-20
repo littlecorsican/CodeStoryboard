@@ -3,7 +3,7 @@
 import { createContext, useContext, ReactNode, useState } from 'react';
 import { TableType, PageType } from '../enums/_enums';
 
-interface Step {
+export interface Step {
   key: string;
   description?: string;
   code?: string;

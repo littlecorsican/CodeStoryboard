@@ -4,6 +4,7 @@ import { useGlobal } from '../contexts/GlobalContext';
 import ActionButtons from './ActionButtons';
 import StateDisplay from './BoardDisplay/StateDisplay';
 import DatabaseDisplay from './BoardDisplay/DatabaseDisplay';
+import { importDbTemplate } from '../utils/dbUtils';
 import { useEffect } from 'react';
 
 interface BoardProps {
@@ -140,6 +141,10 @@ export default function Board({ onOpenCreateNewStep, onOpenEditStep, onOpenCreat
     onOpenCreateNewDb(index); // Open database modal
   };
 
+  const handleImportDbTemplate = (index: number) => {
+    importDbTemplate(index, steps, setSteps);
+  };
+
   return (
     <div className="flex-1 p-6 bg-gray-50 dark:bg-gray-900">
       <div className="max-w-7xl mx-auto">
@@ -251,6 +256,7 @@ export default function Board({ onOpenCreateNewStep, onOpenEditStep, onOpenCreat
                   onDelete={deleteStep}
                   onOpenCreateNewDb={openCreateNewDb}
                   onEditDb={editDb}
+                  onImportDb={handleImportDbTemplate}
                 />
               </div>
             ))}

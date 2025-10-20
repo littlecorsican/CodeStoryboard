@@ -3,10 +3,46 @@
 import React from 'react';
 import { useGlobal } from '../../contexts/GlobalContext';
 import { TableType } from '../../enums/_enums';
-import { Box, Typography, Card, CardContent, Divider, Chip } from '@mui/material';
+import { Box, Typography, Card, CardContent, Divider, Chip, Button } from '@mui/material';
+import { Download as DownloadIcon } from '@mui/icons-material';
 
 export default function DbTemplateList() {
   const { dbTemplate } = useGlobal();
+
+  const exportDbTemplates = () => {
+    // Create export data
+    const exportData = {
+      dbTemplates: dbTemplate,
+      exportedAt: new Date().toISOString(),
+      version: '1.0'
+    };
+
+    // Convert to JSON string with proper formatting
+    const jsonString = JSON.stringify(exportData, null, 2);
+    
+    // Create a blob with the JSON data
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    
+    // Create a temporary URL for the blob
+    const url = URL.createObjectURL(blob);
+    
+    // Generate filename with timestamp
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+    const filename = `db-templates_${timestamp}.json`;
+    
+    // Create a temporary anchor element to trigger download
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    
+    // Append to body, click, and remove
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Clean up the URL object
+    URL.revokeObjectURL(url);
+  };
 
   if (!dbTemplate || dbTemplate.length === 0) {
     return (
@@ -23,9 +59,25 @@ export default function DbTemplateList() {
 
   return (
     <Box sx={{ p: 2 }}>
-      <Typography variant="h5" gutterBottom sx={{ mb: 3, color: 'white' }}>
-        Database Templates ({dbTemplate.length})
-      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Typography variant="h5" sx={{ color: 'white' }}>
+          Database Templates ({dbTemplate.length})
+        </Typography>
+        <Button
+          variant="contained"
+          startIcon={<DownloadIcon />}
+          onClick={exportDbTemplates}
+          sx={{
+            bgcolor: 'primary.main',
+            color: 'white',
+            '&:hover': {
+              bgcolor: 'primary.dark'
+            }
+          }}
+        >
+          Export DB Template
+        </Button>
+      </Box>
       
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         {dbTemplate.map((template, index) => (

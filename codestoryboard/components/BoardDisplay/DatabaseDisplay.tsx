@@ -21,7 +21,7 @@ export default function DatabaseDisplay({ db }: DatabaseDisplayProps) {
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium text-orange-700 dark:text-orange-300">Type:</span>
                 <span className="text-sm text-orange-600 dark:text-orange-400">
-                  {dbItem.db === TableType.SQL ? 'SQL' : 'NoSQL'}
+                  {dbItem.dbType === TableType.SQL ? 'SQL' : 'NoSQL'}
                 </span>
               </div>
               <div className="flex items-center gap-2">
