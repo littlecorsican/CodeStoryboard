@@ -1,6 +1,8 @@
 'use client';
 
+import { PageType } from '@/enums/_enums';
 import { useState } from 'react';
+import { useGlobal } from '@/contexts/GlobalContext';
 
 interface MenuItem {
   id: string;
@@ -19,13 +21,31 @@ interface LeftMenuProps {
 export default function LeftMenu({ onOpenCreateNewStep, onOpenCreateNewDbTemplate }: LeftMenuProps) {
   const [expandedItems, setExpandedItems] = useState<string[]>(['projects', 'code', 'tools']);
   const [activeItem, setActiveItem] = useState<string>('dashboard');
-
+  const { setPage } = useGlobal();
+  
   const menuItems: MenuItem[] = [
     {
       id: 'dashboard',
       label: 'Dashboard',
       icon: '📊',
-      href: '/'
+      children: [
+        { 
+          id: 'goto_board', 
+          label: 'Board', 
+          icon: '📂', 
+          onClick: () => {
+            setPage(PageType.BOARD);
+          }
+        },
+        { 
+          id: 'goto_db_templates', 
+          label: 'Db Templates', 
+          icon: '📂', 
+          onClick: () => {
+            setPage(PageType.DBTEMPLATE);
+          }
+        },
+      ]
     },
     {
       id: 'projects',

@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, ReactNode, useState } from 'react';
-import { TableType } from '../enums/_enums';
+import { TableType, PageType } from '../enums/_enums';
 
 interface Step {
   key: string;
@@ -16,7 +16,7 @@ interface Step {
 interface DbTemplate {
   dbType: TableType;
   table_name: string;
-  data: Record<string, string>;
+  data: Record<string, Record<string, string>>;
 }
 
 interface GlobalState {
@@ -25,6 +25,8 @@ interface GlobalState {
   editingStep: { index: number; step: Step } | null;
   dbTemplate: DbTemplate[];
   setDbTemplate: (dbTemplate: any[]) => void;
+  page: PageType;
+  setPage: (page: PageType) => void;
 }
 
 interface GlobalActions {
@@ -46,12 +48,14 @@ export function GlobalProvider({ children }: GlobalProviderProps) {
   const [steps, setSteps] = useState<Step[]>([]);
   const [editingStep, setEditingStep] = useState<{ index: number; step: Step } | null>(null);
   const [dbTemplate, setDbTemplate] = useState<DbTemplate[]>([]);
+  const [page, setPage] = useState<PageType>(PageType.BOARD);
 
   const value: GlobalContextType = {
     isLoading, setIsLoading,
     steps, setSteps,
     editingStep, setEditingStep,
     dbTemplate, setDbTemplate,
+    page, setPage,
   };
 
   return (

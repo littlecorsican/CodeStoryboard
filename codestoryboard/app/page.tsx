@@ -1,18 +1,20 @@
 'use client';
 import Board from "../components/Board";
 import LeftMenu from "../components/LeftMenu";
+import DbTemplateList from "../components/DbTemplates/DbTemplateList";
 import CreateNewStep from "../modals/CreateNewStep";
 import CreateNewDb from "../modals/CreateNewDb";
 import CreateNewDbTemplate from "../modals/CreateNewDbTemplate";
 import { useModal } from "../hooks/useModal";
 import { useGlobal } from "../contexts/GlobalContext";
+import { PageType } from "../enums/_enums";
 import { useEffect } from "react";
 
 export default function Home() {
   const { openModal: openCreateNewStepModal, closeModal: closeCreateNewStepModal, ModalWrapper: CreateNewStepModalWrapper } = useModal();
   const { openModal: openCreateNewDbModal, closeModal: closeCreateNewDbModal, ModalWrapper: CreateNewDbModalWrapper } = useModal();
   const { openModal: openCreateNewDbTemplateModal, closeModal: closeCreateNewDbTemplateModal, ModalWrapper: CreateNewDbTemplateModalWrapper } = useModal();
-  const { setEditingStep, dbTemplate } = useGlobal();
+  const { setEditingStep, dbTemplate, page } = useGlobal();
 
   useEffect(() => {
     console.log("dbTemplate", dbTemplate);
@@ -39,11 +41,15 @@ export default function Home() {
         onOpenCreateNewDbTemplate={() => openCreateNewDbTemplateModal()}
       />
       <main className="flex-1 overflow-auto">
-        <Board 
-          onOpenCreateNewStep={handleOpenCreateNewStep}
-          onOpenEditStep={handleOpenEditStep}
-          onOpenCreateNewDb={(index: number) => openCreateNewDbModal()}
-        />
+        {page === PageType.BOARD ? (
+          <Board 
+            onOpenCreateNewStep={handleOpenCreateNewStep}
+            onOpenEditStep={handleOpenEditStep}
+            onOpenCreateNewDb={(index: number) => openCreateNewDbModal()}
+          />
+        ) : page === PageType.DBTEMPLATE ? (
+          <DbTemplateList />
+        ) : null}
       </main>
       
       <CreateNewStepModalWrapper onClose={resetModal}>

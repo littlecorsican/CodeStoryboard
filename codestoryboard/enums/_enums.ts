@@ -16,3 +16,8 @@ export enum ColumnType {
   FLOAT = 'float',
   DOUBLE = 'double',
 }
+
+export enum PageType {
+  BOARD = 'board',
+  DBTEMPLATE = 'dbtemplate'
+}

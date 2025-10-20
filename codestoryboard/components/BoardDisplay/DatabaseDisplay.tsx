@@ -32,7 +32,7 @@ export default function DatabaseDisplay({ db }: DatabaseDisplayProps) {
             {dbItem.data && Object.keys(dbItem.data).length > 0 && (
               <div>
                 <h5 className="text-xs font-medium text-orange-700 dark:text-orange-300 mb-1">Data:</h5>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
+                <div className="flex flex-col gap-1">
                   {Object.entries(dbItem.data).map(([key, value]) => (
                     <div key={key} className="flex items-center gap-2">
                       <span className="text-xs font-medium text-orange-600 dark:text-orange-400">{key}:</span>
