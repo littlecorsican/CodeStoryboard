@@ -1,9 +1,8 @@
 'use client';
 
+import { PageType } from '@/enums/_enums';
 import { useState } from 'react';
-import { useGlobal } from '../contexts/GlobalContext';
-import { importStepsFromJson } from '../utils/importUtils';
-import { exportStepsToJson } from '../utils/exportUtils';
+import { useGlobal } from '@/contexts/GlobalContext';
 
 interface MenuItem {
   id: string;
@@ -16,30 +15,37 @@ interface MenuItem {
 
 interface LeftMenuProps {
   onOpenCreateNewStep: () => void;
+  onOpenCreateNewDbTemplate: () => void;
 }
 
-export default function LeftMenu({ onOpenCreateNewStep }: LeftMenuProps) {
+export default function LeftMenu({ onOpenCreateNewStep, onOpenCreateNewDbTemplate }: LeftMenuProps) {
   const [expandedItems, setExpandedItems] = useState<string[]>(['projects', 'code', 'tools']);
   const [activeItem, setActiveItem] = useState<string>('dashboard');
-  const { steps, setSteps } = useGlobal();
-
-  const handleImportFlow = async () => {
-    try {
-      const importedSteps = await importStepsFromJson();
-      setSteps(importedSteps);
-      console.log('Successfully imported steps:', importedSteps.length);
-    } catch (error) {
-      console.error('Failed to import steps:', error);
-      alert(`Import failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  };
-
+  const { setPage } = useGlobal();
+  
   const menuItems: MenuItem[] = [
     {
       id: 'dashboard',
       label: 'Dashboard',
       icon: '📊',
-      href: '/'
+      children: [
+        { 
+          id: 'goto_board', 
+          label: 'Board', 
+          icon: '📂', 
+          onClick: () => {
+            setPage(PageType.BOARD);
+          }
+        },
+        { 
+          id: 'goto_db_templates', 
+          label: 'Db Templates', 
+          icon: '📂', 
+          onClick: () => {
+            setPage(PageType.DBTEMPLATE);
+          }
+        },
+      ]
     },
     {
       id: 'projects',
@@ -74,9 +80,16 @@ export default function LeftMenu({ onOpenCreateNewStep }: LeftMenuProps) {
           id: 'add_new_step', 
           label: 'Add New Step', 
           icon: '📝', 
-          href: '/code/snippets',
           onClick: () => {
             onOpenCreateNewStep();
+          }
+        },
+        { 
+          id: 'add_new_db_template', 
+          label: 'Add New Db Template', 
+          icon: '💾', 
+          onClick: () => {
+            onOpenCreateNewDbTemplate();
           }
         },
       ]

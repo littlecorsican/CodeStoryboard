@@ -2,13 +2,22 @@
 
 import { useGlobal } from '../contexts/GlobalContext';
 import ActionButtons from './ActionButtons';
+import StateDisplay from './BoardDisplay/StateDisplay';
+import DatabaseDisplay from './BoardDisplay/DatabaseDisplay';
+import { useEffect } from 'react';
 
 interface BoardProps {
   onOpenCreateNewStep: () => void;
+  onOpenEditStep: () => void;
+  onOpenCreateNewDb: (index: number) => void;
 }
 
-export default function Board({ onOpenCreateNewStep }: BoardProps) {
+export default function Board({ onOpenCreateNewStep, onOpenEditStep, onOpenCreateNewDb }: BoardProps) {
   const { steps, setSteps, setEditingStep } = useGlobal();
+
+  useEffect(() => {
+    console.log(steps);
+  }, [steps]);
 
   const deleteStep = (index: number) => {
     const newSteps = steps.filter((_, i) => i !== index);
@@ -32,17 +41,13 @@ export default function Board({ onOpenCreateNewStep }: BoardProps) {
     const currentStep = steps[index];
     const previousStep = steps[index - 1];
 
-    // Check if both steps have the new format with state
-    if (currentStep.value && typeof currentStep.value === 'object' && 
-        previousStep.value && typeof previousStep.value === 'object') {
+    // Check if both steps have state properties
+    if (currentStep.state && previousStep.state) {
       
       // Create updated current step with previous step's state
       const updatedStep = {
         ...currentStep,
-        value: {
-          ...currentStep.value,
-          state: previousStep.value.state || {}
-        }
+        state: previousStep.state || {}
       };
 
       // Update the steps array
@@ -52,10 +57,81 @@ export default function Board({ onOpenCreateNewStep }: BoardProps) {
     }
   };
 
+  const syncDb = (index: number) => {
+    // Check if there's a previous step
+    if (index === 0) {
+      console.log('No previous step to sync database from');
+      return;
+    }
+
+    const currentStep = steps[index];
+    const previousStep = steps[index - 1];
+
+    // Check if previous step has database data
+    if (previousStep.db && Array.isArray(previousStep.db) && previousStep.db.length > 0) {
+      
+      // Create updated current step with previous step's database
+      const updatedStep = {
+        ...currentStep,
+        db: [...previousStep.db] // Copy the entire database array
+      };
+
+      // Update the steps array
+      const newSteps = [...steps];
+      newSteps[index] = updatedStep;
+      setSteps(newSteps);
+      
+      console.log('Database synced from previous step');
+    } else {
+      console.log('Previous step has no database to sync');
+    }
+  };
+
+  const clearStates = (index: number) => {
+    const currentStep = steps[index];
+    
+    // Create updated current step without state
+    const updatedStep = {
+      ...currentStep,
+      state: undefined // Remove the state property
+    };
+
+    // Update the steps array
+    const newSteps = [...steps];
+    newSteps[index] = updatedStep;
+    setSteps(newSteps);
+    
+    console.log('All states cleared from step');
+  };
+
+  const clearDb = (index: number) => {
+    const currentStep = steps[index];
+    
+    // Create updated current step without database
+    const updatedStep = {
+      ...currentStep,
+      db: undefined // Remove the db property
+    };
+
+    // Update the steps array
+    const newSteps = [...steps];
+    newSteps[index] = updatedStep;
+    setSteps(newSteps);
+    
+    console.log('All database entries cleared from step');
+  };
+
   const editStep = (index: number) => {
     const stepToEdit = steps[index];
     setEditingStep({ index, step: stepToEdit });
-    onOpenCreateNewStep(); // Open modal when editing
+    onOpenEditStep(); // Open modal when editing
+  };
+
+
+  const openCreateNewDb = (index: number) => {
+    const stepToEdit = steps[index];
+    setEditingStep({ index, step: stepToEdit });
+    onOpenCreateNewDb(index); // Open database modal
   };
 
   return (
@@ -103,66 +179,54 @@ export default function Board({ onOpenCreateNewStep }: BoardProps) {
                     </h3>
                     
                     {/* Display new format with description, code, location, and state */}
-                    {step.value && typeof step.value === 'object' && (step.value.description || step.value.code || step.value.location || step.value.state) ? (
+                    {(step.description || step.code || step.location || step.state) ? (
                       <div className="space-y-3">
                         {/* Description */}
-                        {step.value.description && (
+                        {step.description && (
                           <div className="bg-blue-50 dark:bg-blue-900/20 rounded-md p-3">
                             <h4 className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-1">Description:</h4>
-                            <p className="text-sm text-blue-700 dark:text-blue-300">{step.value.description}</p>
+                            <p className="text-sm text-blue-700 dark:text-blue-300">{step.description}</p>
                           </div>
                         )}
                         
                         {/* Code */}
-                        {step.value.code && (
+                        {step.code && (
                           <div className="bg-gray-50 dark:bg-gray-700 rounded-md p-3">
                             <h4 className="text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">Code:</h4>
                             <pre className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap break-words font-mono">
-                              {step.value.code}
+                              {step.code}
                             </pre>
                           </div>
                         )}
                         
                         {/* Location */}
-                        {step.value.location && (
+                        {step.location && (
                           <div className="bg-purple-50 dark:bg-purple-900/20 rounded-md p-3">
                             <h4 className="text-sm font-medium text-purple-800 dark:text-purple-200 mb-2">Location:</h4>
                             <button
                               onClick={() => {
-                                if (step.value.location) {
-                                  window.open(`vscode://file/${step.value.location}`, '_blank');
+                                if (step.location) {
+                                  window.open(`vscode://file/${step.location}`, '_blank');
                                 }
                               }}
                               className="text-sm text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-200 underline cursor-pointer break-all text-left"
                             >
-                              {step.value.location}
+                              {step.location}
                             </button>
                           </div>
                         )}
                         
                         {/* State */}
-                        {step.value.state && Object.keys(step.value.state).length > 0 && (
-                          <div className="bg-green-50 dark:bg-green-900/20 rounded-md p-3">
-                            <h4 className="text-sm font-medium text-green-800 dark:text-green-200 mb-2">State:</h4>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                              {Object.entries(step.value.state).map(([key, value]) => (
-                                <div key={key} className="flex items-center gap-2">
-                                  <span className="text-sm font-medium text-green-700 dark:text-green-300">{key}:</span>
-                                  <span className="text-sm text-green-600 dark:text-green-400">{String(value)}</span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
+                        <StateDisplay state={step.state || undefined} />
+                        
+                        {/* Database */}
+                        <DatabaseDisplay db={step.db || undefined} />
                       </div>
                     ) : (
-                      /* Legacy format fallback */
+                      /* Legacy format fallback - show step key */
                       <div className="bg-gray-50 dark:bg-gray-700 rounded-md p-3">
                         <pre className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap break-words">
-                          {typeof step.value === 'string' 
-                            ? step.value 
-                            : JSON.stringify(step.value, null, 2)
-                          }
+                          {step.key}
                         </pre>
                       </div>
                     )}
@@ -175,7 +239,11 @@ export default function Board({ onOpenCreateNewStep }: BoardProps) {
                   onEdit={editStep}
                   onDuplicate={duplicateStep}
                   onSyncState={syncState}
+                  onSyncDb={syncDb}
+                  onClearStates={clearStates}
+                  onClearDb={clearDb}
                   onDelete={deleteStep}
+                  onOpenCreateNewDb={openCreateNewDb}
                 />
               </div>
             ))}

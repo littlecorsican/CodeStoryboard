@@ -1,11 +1,34 @@
 'use client';
 import Board from "../components/Board";
 import LeftMenu from "../components/LeftMenu";
+import DbTemplateList from "../components/DbTemplates/DbTemplateList";
 import CreateNewStep from "../modals/CreateNewStep";
+import CreateNewDb from "../modals/CreateNewDb";
+import CreateNewDbTemplate from "../modals/CreateNewDbTemplate";
 import { useModal } from "../hooks/useModal";
+import { useGlobal } from "../contexts/GlobalContext";
+import { PageType } from "../enums/_enums";
+import { useEffect } from "react";
 
 export default function Home() {
   const { openModal: openCreateNewStepModal, closeModal: closeCreateNewStepModal, ModalWrapper: CreateNewStepModalWrapper } = useModal();
+  const { openModal: openCreateNewDbModal, closeModal: closeCreateNewDbModal, ModalWrapper: CreateNewDbModalWrapper } = useModal();
+  const { openModal: openCreateNewDbTemplateModal, closeModal: closeCreateNewDbTemplateModal, ModalWrapper: CreateNewDbTemplateModalWrapper } = useModal();
+  const { setEditingStep, dbTemplate, page } = useGlobal();
+
+  useEffect(() => {
+    console.log("dbTemplate", dbTemplate);
+  }, [dbTemplate]);
+
+  const handleOpenCreateNewStep = () => {
+    setEditingStep(null); // Clear editing step to ensure create mode
+    openCreateNewStepModal();
+  };
+
+  const handleOpenEditStep = () => {
+    // Don't clear editingStep - it should already be set by the editStep function
+    openCreateNewStepModal();
+  };
 
   const resetModal = () => {
     // Reset any modal-specific state here if needed
@@ -13,14 +36,33 @@ export default function Home() {
 
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
-      <LeftMenu onOpenCreateNewStep={openCreateNewStepModal} />
+      <LeftMenu 
+        onOpenCreateNewStep={handleOpenCreateNewStep} 
+        onOpenCreateNewDbTemplate={() => openCreateNewDbTemplateModal()}
+      />
       <main className="flex-1 overflow-auto">
-        <Board onOpenCreateNewStep={openCreateNewStepModal} />
+        {page === PageType.BOARD ? (
+          <Board 
+            onOpenCreateNewStep={handleOpenCreateNewStep}
+            onOpenEditStep={handleOpenEditStep}
+            onOpenCreateNewDb={(index: number) => openCreateNewDbModal()}
+          />
+        ) : page === PageType.DBTEMPLATE ? (
+          <DbTemplateList />
+        ) : null}
       </main>
       
       <CreateNewStepModalWrapper onClose={resetModal}>
         <CreateNewStep onClose={closeCreateNewStepModal} />
       </CreateNewStepModalWrapper>
+      
+      <CreateNewDbModalWrapper onClose={resetModal}>
+        <CreateNewDb onClose={closeCreateNewDbModal} />
+      </CreateNewDbModalWrapper>
+
+      <CreateNewDbTemplateModalWrapper onClose={resetModal}>
+        <CreateNewDbTemplate onClose={closeCreateNewDbTemplateModal} />
+      </CreateNewDbTemplateModalWrapper>
     </div>
   );
 }
