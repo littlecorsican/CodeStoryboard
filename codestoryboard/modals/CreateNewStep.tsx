@@ -34,6 +34,8 @@ export default function CreateNewStep({ onClose }: CreateNewStepProps) {
   const descriptionRef = useRef<HTMLInputElement | null>(null);
   const codeRef = useRef<HTMLInputElement | null>(null);
   const locationRef = useRef<HTMLInputElement | null>(null);
+  const lineStartRef = useRef<HTMLInputElement | null>(null);
+  const lineEndRef = useRef<HTMLInputElement | null>(null);
 
   const resetModal = () => {
     setSavedStates([]);
@@ -45,6 +47,8 @@ export default function CreateNewStep({ onClose }: CreateNewStepProps) {
     descriptionRef.current && (descriptionRef.current.value = '');
     codeRef.current && (codeRef.current.value = '');
     locationRef.current && (locationRef.current.value = '');
+    lineStartRef.current && (lineStartRef.current.value = '');
+    lineEndRef.current && (lineEndRef.current.value = '');
   };
 
   // Load editing data when editingStep changes
@@ -56,6 +60,10 @@ export default function CreateNewStep({ onClose }: CreateNewStepProps) {
       descriptionRef.current && (descriptionRef.current.value = step.description || '');
       codeRef.current && (codeRef.current.value = step.code || '');
       locationRef.current && (locationRef.current.value = step.location || '');
+      if (step.line_number) {
+        lineStartRef.current && (lineStartRef.current.value = step.line_number.start != null ? String(step.line_number.start) : '');
+        lineEndRef.current && (lineEndRef.current.value = step.line_number.end != null ? String(step.line_number.end) : '');
+      }
       
       if (step.state && typeof step.state === 'object') {
         const states: State[] = Object.entries(step.state).map(([name, value]) => ({
@@ -93,9 +101,10 @@ export default function CreateNewStep({ onClose }: CreateNewStepProps) {
     const hasDescription = Boolean(descriptionRef.current?.value?.trim());
     const hasCode = Boolean(codeRef.current?.value?.trim());
     const hasLocation = Boolean(locationRef.current?.value?.trim());
+    const hasLineNumbers = Boolean(lineStartRef.current?.value?.trim() || lineEndRef.current?.value?.trim());
     const hasStates = savedStates.length > 0;
     
-    setShowAddButton(hasDescription || hasCode || hasLocation || hasStates);
+    setShowAddButton(hasDescription || hasCode || hasLocation || hasLineNumbers || hasStates);
   };
 
   const deleteState = (index: number) => {
@@ -109,6 +118,8 @@ export default function CreateNewStep({ onClose }: CreateNewStepProps) {
     const descriptionValue = descriptionRef.current?.value?.trim() || '';
     const codeValue = codeRef.current?.value?.trim() || '';
     const locationValue = locationRef.current?.value?.trim() || '';
+    const lineStartValue = lineStartRef.current?.value?.trim() || '';
+    const lineEndValue = lineEndRef.current?.value?.trim() || '';
     
     // Create state object
     const stateObject: Record<string, any> = {};
@@ -121,6 +132,10 @@ export default function CreateNewStep({ onClose }: CreateNewStepProps) {
       description: descriptionValue,
       code: codeValue,
       location: locationValue,
+      line_number: (lineStartValue || lineEndValue) ? {
+        start: lineStartValue ? Number(lineStartValue) : undefined,
+        end: lineEndValue ? Number(lineEndValue) : undefined
+      } : undefined,
       state: stateObject
     };
     
@@ -194,6 +209,38 @@ export default function CreateNewStep({ onClose }: CreateNewStepProps) {
                 }
               }}
             />
+            <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+              <TextField
+                label="Line numbers - start"
+                inputRef={lineStartRef}
+                onBlur={updateButtonVisibility}
+                variant="outlined"
+                size="small"
+                fullWidth
+                type="number"
+                inputProps={{ min: 0 }}
+                sx={{
+                  '& .MuiInputBase-input': {
+                    color: 'white'
+                  }
+                }}
+              />
+              <TextField
+                label="Line numbers - end"
+                inputRef={lineEndRef}
+                onBlur={updateButtonVisibility}
+                variant="outlined"
+                size="small"
+                fullWidth
+                type="number"
+                inputProps={{ min: 0 }}
+                sx={{
+                  '& .MuiInputBase-input': {
+                    color: 'white'
+                  }
+                }}
+              />
+            </Box>
             <TextField
               label="Location"
               inputRef={locationRef}

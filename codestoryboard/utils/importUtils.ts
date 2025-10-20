@@ -3,6 +3,7 @@ interface Step {
   description?: string;
   code?: string;
   location?: string;
+  line_number?: { start?: number; end?: number };
   state?: Record<string, any>;
   db?: any[];
   [key: string]: any;
@@ -14,6 +15,7 @@ interface ImportData {
     code?: string;
     location?: string;
     description?: string;
+    line_number?: { start?: number; end?: number };
     state?: Record<string, any>;
     db?: any[];
   }>;
@@ -53,6 +55,7 @@ export const importStepsFromJson = (): Promise<Step[]> => {
             description: stepData.description || '',
             code: stepData.code || '',
             location: stepData.location || '',
+            line_number: stepData.line_number || undefined,
             state: stepData.state || {},
             db: stepData.db || []
           }));

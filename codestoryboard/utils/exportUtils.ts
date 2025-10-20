@@ -3,6 +3,7 @@ interface Step {
   description?: string;
   code?: string;
   location?: string;
+  line_number?: { start?: number; end?: number };
   state?: Record<string, any>;
   db?: any[];
   [key: string]: any;
@@ -14,6 +15,7 @@ interface ExportData {
     code?: string;
     location?: string;
     description?: string;
+    line_number?: { start?: number; end?: number };
     state?: Record<string, any>;
     db?: any[];
   }>;
@@ -27,6 +29,7 @@ export const exportStepsToJson = (steps: Step[], customFilename?: string): void 
       code: step.code || '',
       location: step.location || '',
       description: step.description || '',
+      line_number: step.line_number || undefined,
       state: step.state || {},
       db: step.db || []
     }))

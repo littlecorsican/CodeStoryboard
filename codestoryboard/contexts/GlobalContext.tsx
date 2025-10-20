@@ -8,6 +8,7 @@ export interface Step {
   description?: string;
   code?: string;
   location?: string;
+  line_number?: { start?: number; end?: number };
   state?: Record<string, any>;
   db?: any[];
   [key: string]: any; // Allow additional properties

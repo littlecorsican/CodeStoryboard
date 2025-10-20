@@ -4,6 +4,10 @@ import { useGlobal } from '../contexts/GlobalContext';
 import ActionButtons from './ActionButtons';
 import StateDisplay from './BoardDisplay/StateDisplay';
 import DatabaseDisplay from './BoardDisplay/DatabaseDisplay';
+import DescriptionDisplay from './BoardDisplay/DescriptionDisplay';
+import CodeDisplay from './BoardDisplay/CodeDisplay';
+import LocationDisplay from './BoardDisplay/LocationDisplay';
+import LineNumberDisplay from './BoardDisplay/LineNumberDisplay';
 import { importDbTemplate } from '../utils/dbUtils';
 import { useEffect } from 'react';
 
@@ -193,39 +197,16 @@ export default function Board({ onOpenCreateNewStep, onOpenEditStep, onOpenCreat
                     {(step.description || step.code || step.location || step.state) ? (
                       <div className="space-y-3">
                         {/* Description */}
-                        {step.description && (
-                          <div className="bg-blue-50 dark:bg-blue-900/20 rounded-md p-3">
-                            <h4 className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-1">Description:</h4>
-                            <p className="text-sm text-blue-700 dark:text-blue-300">{step.description}</p>
-                          </div>
-                        )}
+                        <DescriptionDisplay description={step.description} />
                         
                         {/* Code */}
-                        {step.code && (
-                          <div className="bg-gray-50 dark:bg-gray-700 rounded-md p-3">
-                            <h4 className="text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">Code:</h4>
-                            <pre className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap break-words font-mono">
-                              {step.code}
-                            </pre>
-                          </div>
-                        )}
+                        <CodeDisplay code={step.code} />
                         
                         {/* Location */}
-                        {step.location && (
-                          <div className="bg-purple-50 dark:bg-purple-900/20 rounded-md p-3">
-                            <h4 className="text-sm font-medium text-purple-800 dark:text-purple-200 mb-2">Location:</h4>
-                            <button
-                              onClick={() => {
-                                if (step.location) {
-                                  window.open(`vscode://file/${step.location}`, '_blank');
-                                }
-                              }}
-                              className="text-sm text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-200 underline cursor-pointer break-all text-left"
-                            >
-                              {step.location}
-                            </button>
-                          </div>
-                        )}
+                        <LocationDisplay location={step.location} />
+
+                        {/* Line Numbers */}
+                        <LineNumberDisplay line_number={step.line_number} />
                         
                         {/* State */}
                         <StateDisplay state={step.state || undefined} />
