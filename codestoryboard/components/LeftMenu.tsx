@@ -49,7 +49,7 @@ export default function LeftMenu({ onOpenCreateNewStep, onOpenCreateNewDbTemplat
         { 
           id: 'goto_board', 
           label: 'Board', 
-          icon: '📂', 
+          icon: '📚', 
           onClick: () => {
             setPage(PageType.BOARD);
           }
@@ -57,7 +57,7 @@ export default function LeftMenu({ onOpenCreateNewStep, onOpenCreateNewDbTemplat
         { 
           id: 'goto_db_templates', 
           label: 'Db Templates', 
-          icon: '📂', 
+          icon: '🗄️', 
           onClick: () => {
             setPage(PageType.DBTEMPLATE);
           }
