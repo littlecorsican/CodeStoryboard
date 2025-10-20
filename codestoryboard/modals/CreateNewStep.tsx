@@ -86,6 +86,10 @@ export default function CreateNewStep({ onClose }: CreateNewStepProps) {
     const name = nameRefs.current[0]?.value?.trim() || '';
     const value = valueRefs.current[0]?.value?.trim() || '';
     
+    if (!name) {
+      return;
+    }
+    
     if (name || value) {
       setSavedStates([...savedStates, { name, value }]);
       // Clear inputs
