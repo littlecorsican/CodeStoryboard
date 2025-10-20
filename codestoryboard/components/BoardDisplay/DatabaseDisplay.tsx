@@ -33,10 +33,18 @@ export default function DatabaseDisplay({ db }: DatabaseDisplayProps) {
               <div>
                 <h5 className="text-xs font-medium text-orange-700 dark:text-orange-300 mb-1">Data:</h5>
                 <div className="flex flex-col gap-1">
-                  {Object.entries(dbItem.data).map(([key, value]) => (
+                  {Object.entries(dbItem.data).map(([key, data]) => (
                     <div key={key} className="flex items-center gap-2">
                       <span className="text-xs font-medium text-orange-600 dark:text-orange-400">{key}:</span>
-                      <span className="text-xs text-orange-500 dark:text-orange-500">{String(value)}</span>
+                      {/* Handle both old format (string) and new format (object with value and type) */}
+                      {typeof data === 'string' ? (
+                        <span className="text-xs text-orange-500 dark:text-orange-500">{data}</span>
+                      ) : (
+                        <div className="flex flex-col">
+                          <span className="text-xs text-orange-500 dark:text-orange-500">Value: {(data as { value: string; type: string }).value}</span>
+                          <span className="text-xs text-orange-400 dark:text-orange-400">Type: {(data as { value: string; type: string }).type}</span>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>

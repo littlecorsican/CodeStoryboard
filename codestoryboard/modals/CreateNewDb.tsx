@@ -10,15 +10,20 @@ import {
   RadioGroup,
   FormControlLabel,
   Radio,
-  Divider
+  Divider,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel
 } from '@mui/material';
 import { Remove as RemoveIcon } from '@mui/icons-material';
 import { useGlobal } from '../contexts/GlobalContext';
-import { TableType } from '../enums/_enums';
+import { TableType, ColumnType } from '../enums/_enums';
 
 interface ColumnData {
   column_name: string;
   column_value: string;
+  column_type: ColumnType;
 }
 
 interface CreateNewDbProps {
@@ -32,6 +37,7 @@ export default function CreateNewDb({ onClose }: CreateNewDbProps) {
   const [showAddButton, setShowAddButton] = useState<boolean>(false);
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
   const [editingDbIndex, setEditingDbIndex] = useState<number>(-1);
+  const [currentColumnType, setCurrentColumnType] = useState<ColumnType>(ColumnType.VARCHAR);
   
   const columnNameRef = useRef<HTMLInputElement | null>(null);
   const columnValueRef = useRef<HTMLInputElement | null>(null);
@@ -47,10 +53,23 @@ export default function CreateNewDb({ onClose }: CreateNewDbProps) {
       setTableName(firstDb.table_name || '');
       
       // Convert data object to column format
-      const columns: ColumnData[] = Object.entries(firstDb.data || {}).map(([name, value]) => ({
-        column_name: name,
-        column_value: String(value)
-      }));
+      const columns: ColumnData[] = Object.entries(firstDb.data || {}).map(([name, data]) => {
+        // Handle both old format (string) and new format (object with value and type)
+        if (typeof data === 'string') {
+          return {
+            column_name: name,
+            column_value: data,
+            column_type: ColumnType.VARCHAR // Default type for legacy data
+          };
+        } else {
+          const typedData = data as { value: string; type: string };
+          return {
+            column_name: name,
+            column_value: typedData.value,
+            column_type: typedData.type as ColumnType
+          };
+        }
+      });
       setSavedColumns(columns);
       
       setIsEditMode(true);
@@ -71,6 +90,7 @@ export default function CreateNewDb({ onClose }: CreateNewDbProps) {
     setShowAddButton(false);
     setIsEditMode(false);
     setEditingDbIndex(-1);
+    setCurrentColumnType(ColumnType.VARCHAR);
     // Clear input refs
     if (columnNameRef.current) columnNameRef.current.value = '';
     if (columnValueRef.current) columnValueRef.current.value = '';
@@ -81,10 +101,16 @@ export default function CreateNewDb({ onClose }: CreateNewDbProps) {
     const columnValue = columnValueRef.current?.value?.trim() || '';
     
     if (columnName || columnValue) {
-      setSavedColumns([...savedColumns, { column_name: columnName, column_value: columnValue }]);
+      setSavedColumns([...savedColumns, { 
+        column_name: columnName, 
+        column_value: columnValue, 
+        column_type: currentColumnType 
+      }]);
       // Clear inputs
       if (columnNameRef.current) columnNameRef.current.value = '';
       if (columnValueRef.current) columnValueRef.current.value = '';
+      // Reset column type to default
+      setCurrentColumnType(ColumnType.VARCHAR);
       // Update button visibility
       updateButtonVisibility();
     }
@@ -106,9 +132,12 @@ export default function CreateNewDb({ onClose }: CreateNewDbProps) {
 
   const addToDb = () => {
     // Create data object from saved columns
-    const dataObject: Record<string, string> = {};
+    const dataObject: Record<string, Record<string, string>> = {};
     savedColumns.forEach(column => {
-      dataObject[column.column_name] = column.column_value;
+      dataObject[column.column_name] = {
+        value: column.column_value,
+        type: column.column_type
+      };
     });
     
     // Create database object
@@ -265,6 +294,37 @@ export default function CreateNewDb({ onClose }: CreateNewDbProps) {
                 }
               }}
             />
+            <FormControl fullWidth size="small">
+              <InputLabel sx={{ color: 'white' }}>Column Type</InputLabel>
+              <Select
+                value={currentColumnType}
+                onChange={(e) => setCurrentColumnType(e.target.value as ColumnType)}
+                label="Column Type"
+                sx={{
+                  color: 'white',
+                  '& .MuiOutlinedInput-notchedOutline': {
+                    borderColor: 'rgba(255, 255, 255, 0.23)',
+                  },
+                  '&:hover .MuiOutlinedInput-notchedOutline': {
+                    borderColor: 'rgba(255, 255, 255, 0.5)',
+                  },
+                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                    borderColor: 'white',
+                  },
+                }}
+              >
+                <MenuItem value={ColumnType.VARCHAR}>VARCHAR</MenuItem>
+                <MenuItem value={ColumnType.INTEGER}>INTEGER</MenuItem>
+                <MenuItem value={ColumnType.BOOLEAN}>BOOLEAN</MenuItem>
+                <MenuItem value={ColumnType.DATE}>DATE</MenuItem>
+                <MenuItem value={ColumnType.TIME}>TIME</MenuItem>
+                <MenuItem value={ColumnType.DATETIME}>DATETIME</MenuItem>
+                <MenuItem value={ColumnType.TIMESTAMP}>TIMESTAMP</MenuItem>
+                <MenuItem value={ColumnType.DECIMAL}>DECIMAL</MenuItem>
+                <MenuItem value={ColumnType.FLOAT}>FLOAT</MenuItem>
+                <MenuItem value={ColumnType.DOUBLE}>DOUBLE</MenuItem>
+              </Select>
+            </FormControl>
           </Box>
         </Box>
 
@@ -310,12 +370,15 @@ export default function CreateNewDb({ onClose }: CreateNewDbProps) {
                     bgcolor: 'background.default'
                   }}
                 >
-                  <Box sx={{ flex: 1, display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around', minWidth: 0, color: 'black' }}>
+                  <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', minWidth: 0, color: 'black', gap: 0.5 }}>
                     <Typography variant="subtitle2" noWrap>
                       {column.column_name}
                     </Typography>
                     <Typography variant="body2" color="text.secondary" noWrap>
                       {column.column_value}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" noWrap>
+                      Type: {column.column_type}
                     </Typography>
                   </Box>
                   <IconButton 
