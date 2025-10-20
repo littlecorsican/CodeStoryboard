@@ -19,9 +19,10 @@ interface MenuItem {
 interface LeftMenuProps {
   onOpenCreateNewStep: () => void;
   onOpenCreateNewDbTemplate: () => void;
+  onOpenSaveModal: () => void;
 }
 
-export default function LeftMenu({ onOpenCreateNewStep, onOpenCreateNewDbTemplate }: LeftMenuProps) {
+export default function LeftMenu({ onOpenCreateNewStep, onOpenCreateNewDbTemplate, onOpenSaveModal }: LeftMenuProps) {
   const [expandedItems, setExpandedItems] = useState<string[]>(['projects', 'code', 'tools']);
   const [activeItem, setActiveItem] = useState<string>('dashboard');
   const { steps, setSteps } = useGlobal();
@@ -75,7 +76,7 @@ export default function LeftMenu({ onOpenCreateNewStep, onOpenCreateNewDbTemplat
           href: '/projects',
           onClick: () => {
             console.log('Exporting flow...');
-            exportStepsToJson(steps);
+            onOpenSaveModal()
           }
         },
         { 

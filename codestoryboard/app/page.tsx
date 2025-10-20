@@ -5,15 +5,18 @@ import DbTemplateList from "../components/DbTemplates/DbTemplateList";
 import CreateNewStep from "../modals/CreateNewStep";
 import CreateNewDb from "../modals/CreateNewDb";
 import CreateNewDbTemplate from "../modals/CreateNewDbTemplate";
+import SaveModal from "@/modals/SaveModal";
 import { useModal } from "../hooks/useModal";
 import { useGlobal } from "../contexts/GlobalContext";
 import { PageType } from "../enums/_enums";
 import { useEffect } from "react";
+import { Save } from "@mui/icons-material";
 
 export default function Home() {
   const { openModal: openCreateNewStepModal, closeModal: closeCreateNewStepModal, ModalWrapper: CreateNewStepModalWrapper } = useModal();
   const { openModal: openCreateNewDbModal, closeModal: closeCreateNewDbModal, ModalWrapper: CreateNewDbModalWrapper } = useModal();
   const { openModal: openCreateNewDbTemplateModal, closeModal: closeCreateNewDbTemplateModal, ModalWrapper: CreateNewDbTemplateModalWrapper } = useModal();
+  const { openModal: openSaveModal, closeModal: closeSaveModal, ModalWrapper: SaveModalWrapper } = useModal();
   const { setEditingStep, dbTemplate, page } = useGlobal();
 
   useEffect(() => {
@@ -44,6 +47,7 @@ export default function Home() {
       <LeftMenu 
         onOpenCreateNewStep={handleOpenCreateNewStep} 
         onOpenCreateNewDbTemplate={() => openCreateNewDbTemplateModal()}
+        onOpenSaveModal={()=>openSaveModal()}
       />
       <main className="flex-1 overflow-auto">
         {page === PageType.BOARD ? (
@@ -69,6 +73,10 @@ export default function Home() {
       <CreateNewDbTemplateModalWrapper onClose={resetModal}>
         <CreateNewDbTemplate onClose={closeCreateNewDbTemplateModal} />
       </CreateNewDbTemplateModalWrapper>
+
+      <SaveModalWrapper onClose={resetModal}>
+        <SaveModal onClose={closeSaveModal} />
+      </SaveModalWrapper>
     </div>
   );
 }

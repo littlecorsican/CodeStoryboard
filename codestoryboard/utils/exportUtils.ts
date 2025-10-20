@@ -19,7 +19,7 @@ interface ExportData {
   }>;
 }
 
-export const exportStepsToJson = (steps: Step[]): void => {
+export const exportStepsToJson = (steps: Step[], customFilename?: string): void => {
   // Transform steps to the required format
   const exportData: ExportData = {
     steps: steps.map(step => ({
@@ -44,7 +44,7 @@ export const exportStepsToJson = (steps: Step[]): void => {
   // Create a temporary anchor element to trigger download
   const link = document.createElement('a');
   link.href = url;
-  link.download = `codestoryboard-export-${new Date().toISOString().split('T')[0]}.json`;
+  link.download = customFilename || `codestoryboard-export-${new Date().toISOString().split('T')[0]}.json`;
   
   // Append to body, click, and remove
   document.body.appendChild(link);
